@@ -22,29 +22,19 @@ export default function Login() {
 async function handleLogin(e: React.FormEvent) {
   e.preventDefault();
 
-  console.log("Login clicked");
-
   try {
-    console.log("Sending request...");
-
     const { data } = await api.post("/auth/login", {
       email,
       password,
     });
 
-    console.log("Response:", data);
-
     chrome.storage.local.set({
       token: data.token,
     });
 
-    console.log("Saved token");
-
     navigate("/dashboard");
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
-  console.log(err.response);
-  console.log(err.response?.data);
   }
 }
 

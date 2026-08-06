@@ -4,8 +4,8 @@ export const saveToken = (token: string) => {
 
 export const getToken = (): Promise<string | null> => {
   return new Promise((resolve) => {
-    chrome.storage.local.get(["token"], (result) => {
-      resolve(result.token || null);
+    chrome.storage.local.get(["token"], (result: { token?: string }) => {
+      resolve(result.token ?? null);
     });
   });
 };
