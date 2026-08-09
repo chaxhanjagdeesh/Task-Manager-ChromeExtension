@@ -1,42 +1,36 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
 import api from "@/api/api";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-async function handleLogin(e: React.FormEvent) {
-  e.preventDefault();
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
 
-  try {
-    const { data } = await api.post("/auth/login", {
-      email,
-      password,
-    });
+    try {
+      const { data } = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-    chrome.storage.local.set({
-      token: data.token,
-    });
+      chrome.storage.local.set({
+        token: data.token,
+        user: data.user,
+      });
 
-    navigate("/dashboard");
-  } catch (err) {
-    console.log(err);
+      navigate("/dashboard");
+    } catch (err) {
+      console.log(err);
+    }
   }
-}
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100 p-3">
@@ -46,19 +40,14 @@ async function handleLogin(e: React.FormEvent) {
         </CardHeader>
 
         <CardContent>
-          <form
-            onSubmit={handleLogin}
-            className="space-y-4"
-          >
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label>Email</Label>
 
               <Input
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -68,22 +57,17 @@ async function handleLogin(e: React.FormEvent) {
               <Input
                 type="password"
                 value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
-<Button type="submit" className="w-full">
-  Login
-</Button>
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
 
             <p className="text-center">
               Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="text-blue-500"
-              >
+              <Link to="/register" className="text-blue-500">
                 Register
               </Link>
             </p>

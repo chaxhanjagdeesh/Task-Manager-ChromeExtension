@@ -6,7 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import authMiddleware from "./middleware/authMiddleware.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import entryRoutes from "./routes/entryRoutes.js";
-
+import userRoutes from "./routes/user.routes.js";
 dotenv.config();
 
 const app = express();
@@ -31,7 +31,7 @@ app.get("/api/profile", authMiddleware, (req, res) => {
     user: req.user,
   });
 });
-
+app.use("/api/user", userRoutes);
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });

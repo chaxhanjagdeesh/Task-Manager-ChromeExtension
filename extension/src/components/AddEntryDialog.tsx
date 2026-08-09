@@ -99,7 +99,7 @@ export default function AddEntryDialog({
                 type === "expense" ||
                 type === "todo") && (
                 <textarea
-                  className="w-full rounded-md border p-2"
+                  className="w-full rounded-md border rounded-md p-2"
                   rows={4}
                   placeholder="Description"
                   value={description}

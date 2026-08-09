@@ -1,4 +1,6 @@
 import Client from "../models/Client.js";
+import Entry from "../models/Entry.js";
+import mongoose from "mongoose";
 
 export const createClient = async (req, res) => {
   try {
@@ -15,14 +17,65 @@ export const createClient = async (req, res) => {
   }
 };
 
+
 export const getClients = async (req, res) => {
   try {
-    const clients = await Client.find({
-      owner: req.user.id,
-    }).sort({ createdAt: -1 });
+    const clients = await Client.aggregate([
+      // Only current user's clients
+      {
+        $match: {
+          owner: new mongoose.Types.ObjectId(req.user.id),
+        },
+      },
+
+      // Get entries of each client
+      {
+        $lookup: {
+          from: "entries",
+          localField: "_id",
+          foreignField: "client",
+          pipeline: [
+            {
+              $sort: {
+                createdAt: -1,
+              },
+            },
+            {
+              $limit: 1,
+            },
+            {
+              $project: {
+                title: 1,
+                type: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+          as: "lastEntry",
+        },
+      },
+
+      // Convert array -> object
+      {
+        $unwind: {
+          path: "$lastEntry",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Sort by latest activity
+      {
+        $sort: {
+          "lastEntry.createdAt": -1,
+          createdAt: -1,
+        },
+      },
+    ]);
 
     res.json(clients);
   } catch (err) {
+    console.log(err);
+
     res.status(500).json({
       message: err.message,
     });
