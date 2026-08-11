@@ -177,17 +177,19 @@ export default function Register() {
               LOGO PLACEHOLDER
           ================================================= */}
 
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-11 w-14 items-center justify-center rounded-2xl border border-white/80 bg-white/80 text-[10px] font-medium tracking-wide text-gray-300 shadow-sm backdrop-blur">
-              LOGO
-            </div>
-          </div>
+         <div className="mx-auto mb-4 flex items-center justify-center">
+  <img
+    src="/worknest.png"
+    alt="Worknest"
+    className="h-30 w-46 object-contain"
+  />
+</div>
 
           {/* =================================================
               HEADER
           ================================================= */}
 
-          <div className="mb-4 text-center">
+          {/* <div className="mb-4 text-center">
             <h1 className="text-[22px] font-semibold tracking-tight text-gray-900">
               Create your account
             </h1>
@@ -195,7 +197,7 @@ export default function Register() {
             <p className="mt-1 text-xs text-gray-500">
               Start organizing your work in one place
             </p>
-          </div>
+          </div> */}
 
           {/* =================================================
               REGISTER CARD

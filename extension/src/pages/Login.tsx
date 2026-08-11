@@ -153,19 +153,20 @@ export default function Login() {
 
               Replace this entire div with your logo later.
             */}
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 shadow-lg shadow-gray-200/30 backdrop-blur">
-              <span className="text-xl font-semibold text-gray-300">
-                LOGO
-              </span>
-            </div>
-
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+<div className="mx-auto mb-4 flex items-center justify-center">
+  <img
+    src="/worknest.png"
+    alt="Worknest"
+    className="h-36 w-52 object-contain"
+  />
+</div>
+            {/* <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
               Welcome back
-            </h1>
+            </h1> */}
 
-            <p className="mt-1.5 text-xs text-gray-500">
+            {/* <p className="mt-1.5 text-xs text-gray-500">
               Sign in to continue to your workspace
-            </p>
+            </p> */}
           </div>
 
           {/* =================================================

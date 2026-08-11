@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://workplaceapi.epayroll.co.in/api",
+  baseURL: "http://localhost:5000/api",
 });
 
 export default api;

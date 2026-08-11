@@ -207,18 +207,24 @@ export default function Workspace() {
       {/* ================================================= */}
 
       <div className="relative z-10 flex items-start justify-between">
+  <div className="flex items-center gap-3">
+    <img
+      src="/worknestlogo.png"
+      alt="Worknest"
+      className="h-15 object-contain"
+    />
 
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Workspaces
-          </h1>
+    <div>
+      <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+        Worknest Workspaces
+      </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Manage your personal and team workspaces.
-          </p>
-        </div>
-
-      </div>
+      <p className="mt-1 text-sm text-gray-500">
+        Manage your personal and team workspaces.
+      </p>
+    </div>
+  </div>
+</div>
 
       {/* ================================================= */}
       {/* Top right controls */}

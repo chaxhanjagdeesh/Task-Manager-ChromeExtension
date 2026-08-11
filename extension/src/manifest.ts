@@ -3,7 +3,7 @@ import { defineManifest } from "@crxjs/vite-plugin";
 export default defineManifest({
   manifest_version: 3,
 
-  name: "Client Manager",
+  name: "Worknest Workspaces",
 
   version: "1.0.0",
 
