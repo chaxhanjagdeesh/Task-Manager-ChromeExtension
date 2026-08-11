@@ -19,6 +19,7 @@ const workspaceTaskSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        required: true,
       },
     ],
 
@@ -26,30 +27,36 @@ const workspaceTaskSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      minlength: 1,
       maxlength: 200,
     },
 
     description: {
       type: String,
       trim: true,
-      maxlength: 5000,
       default: "",
+      maxlength: 1000,
     },
 
     status: {
       type: String,
       enum: ["pending", "in_progress", "completed"],
       default: "pending",
+      required: true,
     },
 
     priority: {
       type: String,
       enum: ["low", "medium", "high"],
       default: "medium",
+      required: true,
     },
 
     dueDate: {
+      type: Date,
+      default: null,
+    },
+
+    completedAt: {
       type: Date,
       default: null,
     },
@@ -59,11 +66,14 @@ const workspaceTaskSchema = new mongoose.Schema(
   }
 );
 
-// Helps retrieve a user's workspace tasks efficiently.
 workspaceTaskSchema.index({
   workspace: 1,
   participants: 1,
-  createdAt: -1,
+});
+
+workspaceTaskSchema.index({
+  workspace: 1,
+  status: 1,
 });
 
 const WorkspaceTask = mongoose.model(

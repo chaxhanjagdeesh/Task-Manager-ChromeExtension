@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Input } from "@/components/ui/input";
-
 import { getClients } from "@/api/client";
 import { getEntries } from "@/api/entry";
 
-import ProfileMenu from "@/components/ProfileMenu";
 import AddClientDialog from "@/components/AddClientDialog";
 import AddEntryDialog from "@/components/AddEntryDialog";
 import EntryCard from "@/components/EntryCard";
@@ -15,6 +14,7 @@ interface Client {
   name: string;
   email?: string;
   phone?: string;
+
   lastEntry?: {
     _id?: string;
     type?: string;
@@ -33,6 +33,8 @@ interface Entry {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] =
     useState<Client | null>(null);
@@ -69,24 +71,12 @@ export default function Dashboard() {
 
       console.log("Clients:", data);
 
-      /*
-       * Support both:
-       *
-       * [...]
-       *
-       * and:
-       *
-       * { clients: [...] }
-       */
       const clientList = Array.isArray(data)
         ? data
         : data?.clients || [];
 
       setClients(clientList);
 
-      /*
-       * Keep selected client valid after refresh.
-       */
       setSelectedClient((current) => {
         if (!current) return null;
 
@@ -144,10 +134,6 @@ export default function Dashboard() {
   function handleSelectClient(client: Client) {
     setSelectedClient(client);
 
-    /*
-     * Reset entry search/filter when switching
-     * to another client.
-     */
     setSearch("");
     setTypeFilter("all");
     setDateFilter("all");
@@ -190,16 +176,10 @@ export default function Dashboard() {
 
   const filteredEntries = entries.filter(
     (entry) => {
-      /*
-       * Type filter
-       */
       const matchesType =
         typeFilter === "all" ||
         entry.type === typeFilter;
 
-      /*
-       * Search filter
-       */
       const query =
         search.toLowerCase().trim();
 
@@ -212,9 +192,6 @@ export default function Dashboard() {
           ?.toLowerCase()
           .includes(query);
 
-      /*
-       * Date filter
-       */
       const created = new Date(
         entry.createdAt
       );
@@ -315,9 +292,21 @@ export default function Dashboard() {
           {/* Sidebar Header */}
           <div className="border-b p-4">
 
-            <div className="mb-3 flex items-center justify-between">
+            {/* Top row */}
+            <div className="mb-3 flex items-center gap-2">
 
-              <div>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/workspace")
+                }
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+                title="Back to Workspaces"
+              >
+                ←
+              </button>
+
+              <div className="min-w-0">
                 <h1 className="text-base font-semibold text-gray-900">
                   Clients
                 </h1>
@@ -326,8 +315,6 @@ export default function Dashboard() {
                   Manage your clients
                 </p>
               </div>
-
-              <ProfileMenu />
 
             </div>
 
@@ -460,10 +447,7 @@ export default function Dashboard() {
           {selectedClient ? (
             <div className="flex h-full min-w-0 flex-col">
 
-              {/* ==========================================
-                  CLIENT HEADER
-              ========================================== */}
-
+              {/* Client Header */}
               <div className="border-b bg-white px-5 py-4">
 
                 <div className="flex items-start justify-between gap-3">
@@ -582,10 +566,7 @@ export default function Dashboard() {
 
               </div>
 
-              {/* ==========================================
-                  ENTRIES
-              ========================================== */}
-
+              {/* Entries */}
               <div
                 ref={entriesContainerRef}
                 className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-gray-50 p-4"
@@ -596,6 +577,10 @@ export default function Dashboard() {
                   <div className="flex h-full items-center justify-center">
 
                     <div className="text-center">
+
+                      <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-sm">
+                        📝
+                      </div>
 
                       <p className="text-sm text-gray-500">
                         No entries found
@@ -634,9 +619,9 @@ export default function Dashboard() {
             </div>
           ) : (
 
-            /* ============================================
+            /* =================================================
                NO CLIENT SELECTED
-            ============================================ */
+            ================================================= */
 
             <div className="flex h-full items-center justify-center bg-gray-50">
 

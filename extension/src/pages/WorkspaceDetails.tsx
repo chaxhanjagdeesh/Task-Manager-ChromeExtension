@@ -20,12 +20,12 @@ interface Workspace {
 interface WorkspaceMember {
   _id: string;
   user:
-    | {
-        _id: string;
-        name?: string;
-        email?: string;
-      }
-    | string;
+  | {
+    _id: string;
+    name?: string;
+    email?: string;
+  }
+  | string;
   role: "admin" | "user";
 }
 
@@ -90,7 +90,7 @@ export default function WorkspaceDetails() {
 
       setError(
         error?.response?.data?.message ||
-          "Failed to load workspace"
+        "Failed to load workspace"
       );
     } finally {
       setLoading(false);
@@ -196,11 +196,10 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => setActiveTab("tasks")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${
-            activeTab === "tasks"
+          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "tasks"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Tasks
         </button>
@@ -208,11 +207,10 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => setActiveTab("notes")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${
-            activeTab === "notes"
+          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "notes"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Notes
         </button>
@@ -220,11 +218,10 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => setActiveTab("members")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${
-            activeTab === "members"
+          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "members"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Members
         </button>
@@ -274,16 +271,11 @@ export default function WorkspaceDetails() {
       ========================= */}
       {showCreateTask && (
         <CreateWorkspaceTask
+          workspaceId={workspace._id}
           members={members}
-          onClose={() =>
-            setShowCreateTask(false)
-          }
+          onClose={() => setShowCreateTask(false)}
           onCreated={(task) => {
-            console.log(
-              "New task:",
-              task
-            );
-
+            console.log("New task:", task);
             setShowCreateTask(false);
           }}
         />

@@ -1,5 +1,4 @@
 import express from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
 
 import {
   createWorkspaceTask,
@@ -9,7 +8,13 @@ import {
   deleteWorkspaceTask,
 } from "../controllers/workspaceTaskController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+
 const router = express.Router();
+
+/*
+ * /api/workspaces/:id/tasks
+ */
 
 router.post(
   "/:id/tasks",
@@ -22,10 +27,11 @@ router.get(
   authMiddleware,
   getWorkspaceTasks
 );
-router.delete(
+
+router.get(
   "/:id/tasks/:taskId",
   authMiddleware,
-  deleteWorkspaceTask
+  getWorkspaceTask
 );
 
 router.put(
@@ -34,10 +40,10 @@ router.put(
   updateWorkspaceTask
 );
 
-router.get(
+router.delete(
   "/:id/tasks/:taskId",
   authMiddleware,
-  getWorkspaceTask
+  deleteWorkspaceTask
 );
 
 export default router;

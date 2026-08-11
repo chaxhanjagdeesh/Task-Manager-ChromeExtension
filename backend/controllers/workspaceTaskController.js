@@ -1,9 +1,16 @@
+import mongoose from "mongoose";
 import WorkspaceTask from "../models/WorkspaceTask.js";
 import WorkspaceMember from "../models/WorkspaceMember.js";
 
+/*
+|--------------------------------------------------------------------------
+| Create Workspace Task
+|--------------------------------------------------------------------------
+*/
 export const createWorkspaceTask = async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       title,
       description,
@@ -12,13 +19,33 @@ export const createWorkspaceTask = async (req, res) => {
       dueDate,
     } = req.body;
 
+    // -----------------------------
+    // Validate title
+    // -----------------------------
     if (!title || !title.trim()) {
       return res.status(400).json({
         message: "Task title is required",
       });
     }
 
-    // The creator must be a member of the workspace.
+    // -----------------------------
+    // Validate participants
+    // -----------------------------
+    if (!Array.isArray(participants)) {
+      return res.status(400).json({
+        message: "Participants must be an array",
+      });
+    }
+
+    if (participants.length === 0) {
+      return res.status(400).json({
+        message: "Please assign the task to at least one person",
+      });
+    }
+
+    // -----------------------------
+    // Verify creator is a workspace member
+    // -----------------------------
     const creatorMembership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -30,42 +57,89 @@ export const createWorkspaceTask = async (req, res) => {
       });
     }
 
-    // Remove duplicates and make sure creator is included.
+    // -----------------------------
+    // Clean participant IDs
+    // -----------------------------
     const participantIds = [
-      ...new Set([
-        req.user.id,
-        ...participants.map((userId) => userId.toString()),
-      ]),
+      ...new Set(
+        participants.map((userId) => userId.toString())
+      ),
     ];
 
-    // Verify every participant belongs to this workspace.
+    // -----------------------------
+    // Verify every participant
+    // belongs to this workspace
+    // -----------------------------
     const validMembers = await WorkspaceMember.find({
       workspace: id,
-      user: { $in: participantIds },
+      user: {
+        $in: participantIds,
+      },
     });
 
     if (validMembers.length !== participantIds.length) {
       return res.status(400).json({
-        message: "One or more participants are not members of this workspace",
+        message:
+          "One or more selected users are not members of this workspace",
       });
     }
 
+    // -----------------------------
+    // Validate priority
+    // -----------------------------
+    const allowedPriorities = [
+      "low",
+      "medium",
+      "high",
+    ];
+
+    const taskPriority = priority || "medium";
+
+    if (!allowedPriorities.includes(taskPriority)) {
+      return res.status(400).json({
+        message: "Invalid task priority",
+      });
+    }
+
+    // -----------------------------
+    // Create task
+    // -----------------------------
     const task = await WorkspaceTask.create({
       workspace: id,
+
+      // Person who created the task
       createdBy: req.user.id,
+
+      // ONLY selected people
       participants: participantIds,
+
       title: title.trim(),
-      description: description?.trim() || "",
-      priority: priority || "medium",
+
+      description:
+        description?.trim() || "",
+
+      priority: taskPriority,
+
       dueDate: dueDate || null,
     });
 
+    // -----------------------------
+    // Return populated task
+    // -----------------------------
+    const populatedTask =
+      await WorkspaceTask.findById(task._id)
+        .populate("createdBy", "name email")
+        .populate("participants", "name email");
+
     return res.status(201).json({
       message: "Task created successfully",
-      task,
+      task: populatedTask,
     });
   } catch (error) {
-    console.error("Create workspace task error:", error);
+    console.error(
+      "Create workspace task error:",
+      error
+    );
 
     return res.status(500).json({
       message: "Failed to create workspace task",
@@ -74,11 +148,16 @@ export const createWorkspaceTask = async (req, res) => {
 };
 
 
+/*
+|--------------------------------------------------------------------------
+| Get Workspace Tasks
+|--------------------------------------------------------------------------
+*/
 export const getWorkspaceTasks = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // First verify that the user belongs to the workspace.
+    // Verify workspace membership
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -90,20 +169,39 @@ export const getWorkspaceTasks = async (req, res) => {
       });
     }
 
-    // Only return tasks where the current user is a participant.
+    /*
+     * Return tasks where:
+     *
+     * 1. Current user created the task
+     * OR
+     * 2. Current user is assigned to the task
+     */
     const tasks = await WorkspaceTask.find({
       workspace: id,
-      participants: req.user.id,
+      $or: [
+        {
+          createdBy: req.user.id,
+        },
+        {
+          participants: req.user.id,
+        },
+      ],
     })
       .populate("createdBy", "name email")
       .populate("participants", "name email")
-      .sort({ createdAt: -1 });
+      .sort({
+        status: 1,
+        createdAt: -1,
+      });
 
     return res.status(200).json({
       tasks,
     });
   } catch (error) {
-    console.error("Get workspace tasks error:", error);
+    console.error(
+      "Get workspace tasks error:",
+      error
+    );
 
     return res.status(500).json({
       message: "Failed to fetch workspace tasks",
@@ -112,11 +210,30 @@ export const getWorkspaceTasks = async (req, res) => {
 };
 
 
+/*
+|--------------------------------------------------------------------------
+| Get Single Workspace Task
+|--------------------------------------------------------------------------
+*/
 export const getWorkspaceTask = async (req, res) => {
   try {
     const { id, taskId } = req.params;
 
-    // First verify that the user belongs to the workspace.
+    /*
+     * Validate IDs
+     */
+    if (
+      !mongoose.Types.ObjectId.isValid(id) ||
+      !mongoose.Types.ObjectId.isValid(taskId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid workspace or task id",
+      });
+    }
+
+    /*
+     * Verify workspace membership
+     */
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -128,7 +245,9 @@ export const getWorkspaceTask = async (req, res) => {
       });
     }
 
-    // Find the task only if the current user is a participant.
+    /*
+     * Only participants can view the task.
+     */
     const task = await WorkspaceTask.findOne({
       _id: taskId,
       workspace: id,
@@ -147,7 +266,10 @@ export const getWorkspaceTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    console.error("Get workspace task error:", error);
+    console.error(
+      "Get workspace task error:",
+      error
+    );
 
     return res.status(500).json({
       message: "Failed to fetch task",
@@ -155,6 +277,12 @@ export const getWorkspaceTask = async (req, res) => {
   }
 };
 
+
+/*
+|--------------------------------------------------------------------------
+| Update Workspace Task
+|--------------------------------------------------------------------------
+*/
 export const updateWorkspaceTask = async (req, res) => {
   try {
     const { id, taskId } = req.params;
@@ -168,7 +296,21 @@ export const updateWorkspaceTask = async (req, res) => {
       participants,
     } = req.body;
 
-    // Verify workspace membership first.
+    /*
+     * Validate IDs
+     */
+    if (
+      !mongoose.Types.ObjectId.isValid(id) ||
+      !mongoose.Types.ObjectId.isValid(taskId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid workspace or task id",
+      });
+    }
+
+    /*
+     * Verify workspace membership
+     */
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -180,7 +322,11 @@ export const updateWorkspaceTask = async (req, res) => {
       });
     }
 
-    // Find the task and make sure the current user is a participant.
+    /*
+     * Find task.
+     *
+     * Current user must be a participant.
+     */
     const task = await WorkspaceTask.findOne({
       _id: taskId,
       workspace: id,
@@ -193,12 +339,19 @@ export const updateWorkspaceTask = async (req, res) => {
       });
     }
 
+    /*
+     * Check whether current user created the task.
+     */
     const isCreator =
-      task.createdBy.toString() === req.user.id;
+      task.createdBy.toString() ===
+      req.user.id.toString();
 
     /*
-     * Any participant can update status.
+     |--------------------------------------------------------------------------
+     | STATUS
+     |--------------------------------------------------------------------------
      */
+
     if (status !== undefined) {
       const allowedStatuses = [
         "pending",
@@ -212,12 +365,42 @@ export const updateWorkspaceTask = async (req, res) => {
         });
       }
 
+      /*
+       * IMPORTANT:
+       *
+       * Only the person the task is assigned to
+       * can mark it completed.
+       *
+       * Since participants contains the people
+       * assigned to the task, we check whether
+       * the current user is inside participants.
+       */
+      const isAssigned =
+        task.participants.some(
+          (participantId) =>
+            participantId.toString() ===
+            req.user.id.toString()
+        );
+
+      if (
+        status === "completed" &&
+        !isAssigned
+      ) {
+        return res.status(403).json({
+          message:
+            "Only a person assigned to this task can mark it as completed",
+        });
+      }
+
       task.status = status;
     }
 
     /*
-     * Only the creator can modify task details.
+     |--------------------------------------------------------------------------
+     | TASK DETAILS
+     |--------------------------------------------------------------------------
      */
+
     const detailFieldsProvided =
       title !== undefined ||
       description !== undefined ||
@@ -225,27 +408,56 @@ export const updateWorkspaceTask = async (req, res) => {
       dueDate !== undefined ||
       participants !== undefined;
 
-    if (detailFieldsProvided && !isCreator) {
+    /*
+     * Only creator can modify task details.
+     */
+    if (
+      detailFieldsProvided &&
+      !isCreator
+    ) {
       return res.status(403).json({
-        message: "Only the task creator can modify task details",
+        message:
+          "Only the task creator can modify task details",
       });
     }
 
+    /*
+     |--------------------------------------------------------------------------
+     | CREATOR UPDATES
+     |--------------------------------------------------------------------------
+     */
+
     if (isCreator) {
+      /*
+       * Title
+       */
       if (title !== undefined) {
-        if (!title.trim()) {
+        if (
+          typeof title !== "string" ||
+          !title.trim()
+        ) {
           return res.status(400).json({
-            message: "Task title cannot be empty",
+            message:
+              "Task title cannot be empty",
           });
         }
 
         task.title = title.trim();
       }
 
+      /*
+       * Description
+       */
       if (description !== undefined) {
-        task.description = description.trim();
+        task.description =
+          typeof description === "string"
+            ? description.trim()
+            : "";
       }
 
+      /*
+       * Priority
+       */
       if (priority !== undefined) {
         const allowedPriorities = [
           "low",
@@ -253,67 +465,110 @@ export const updateWorkspaceTask = async (req, res) => {
           "high",
         ];
 
-        if (!allowedPriorities.includes(priority)) {
+        if (
+          !allowedPriorities.includes(
+            priority
+          )
+        ) {
           return res.status(400).json({
-            message: "Invalid task priority",
+            message:
+              "Invalid task priority",
           });
         }
 
         task.priority = priority;
       }
 
+      /*
+       * Due date
+       */
       if (dueDate !== undefined) {
-        task.dueDate = dueDate || null;
+        task.dueDate =
+          dueDate || null;
       }
 
       /*
-       * If participants are being changed,
-       * every participant must belong to this workspace.
+       * Participants
        */
       if (participants !== undefined) {
         if (!Array.isArray(participants)) {
           return res.status(400).json({
-            message: "Participants must be an array",
+            message:
+              "Participants must be an array",
           });
         }
 
+        /*
+         * Always keep creator included.
+         */
         const participantIds = [
           ...new Set([
-            req.user.id,
-            ...participants.map((userId) =>
-              userId.toString()
+            req.user.id.toString(),
+            ...participants.map(
+              (userId) =>
+                userId.toString()
             ),
           ]),
         ];
 
-        const validMembers = await WorkspaceMember.find({
-          workspace: id,
-          user: { $in: participantIds },
-        });
+        /*
+         * Verify all participants are
+         * workspace members.
+         */
+        const validMembers =
+          await WorkspaceMember.find({
+            workspace: id,
+            user: {
+              $in: participantIds,
+            },
+          });
 
-        if (validMembers.length !== participantIds.length) {
+        if (
+          validMembers.length !==
+          participantIds.length
+        ) {
           return res.status(400).json({
             message:
-              "One or more participants are not members of this workspace",
+              "One or more selected users are not members of this workspace",
           });
         }
 
-        task.participants = participantIds;
+        task.participants =
+          participantIds;
       }
     }
 
+    /*
+     * Save changes
+     */
     await task.save();
 
-    const updatedTask = await WorkspaceTask.findById(task._id)
-      .populate("createdBy", "name email")
-      .populate("participants", "name email");
+    /*
+     * Return updated populated task
+     */
+    const updatedTask =
+      await WorkspaceTask.findById(
+        task._id
+      )
+        .populate(
+          "createdBy",
+          "name email"
+        )
+        .populate(
+          "participants",
+          "name email"
+        );
 
     return res.status(200).json({
-      message: "Task updated successfully",
+      message:
+        "Task updated successfully",
       task: updatedTask,
     });
   } catch (error) {
-    console.error("Update workspace task error:", error);
+    console.error(
+      "Update workspace task error:",
+      error
+    );
 
     return res.status(500).json({
       message: "Failed to update task",
@@ -322,29 +577,55 @@ export const updateWorkspaceTask = async (req, res) => {
 };
 
 
-
-export const deleteWorkspaceTask = async (req, res) => {
+/*
+|--------------------------------------------------------------------------
+| Delete Workspace Task
+|--------------------------------------------------------------------------
+*/
+export const deleteWorkspaceTask = async (
+  req,
+  res
+) => {
   try {
     const { id, taskId } = req.params;
 
-    // Verify workspace membership.
-    const membership = await WorkspaceMember.findOne({
-      workspace: id,
-      user: req.user.id,
-    });
-
-    if (!membership) {
-      return res.status(403).json({
-        message: "You are not a member of this workspace",
+    /*
+     * Validate IDs
+     */
+    if (
+      !mongoose.Types.ObjectId.isValid(id) ||
+      !mongoose.Types.ObjectId.isValid(taskId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid workspace or task id",
       });
     }
 
-    // Find the task only if the current user is a participant.
-    const task = await WorkspaceTask.findOne({
-      _id: taskId,
-      workspace: id,
-      participants: req.user.id,
-    });
+    /*
+     * Verify workspace membership
+     */
+    const membership =
+      await WorkspaceMember.findOne({
+        workspace: id,
+        user: req.user.id,
+      });
+
+    if (!membership) {
+      return res.status(403).json({
+        message:
+          "You are not a member of this workspace",
+      });
+    }
+
+    /*
+     * Find task.
+     */
+    const task =
+      await WorkspaceTask.findOne({
+        _id: taskId,
+        workspace: id,
+        participants: req.user.id,
+      });
 
     if (!task) {
       return res.status(404).json({
@@ -352,10 +633,16 @@ export const deleteWorkspaceTask = async (req, res) => {
       });
     }
 
-    // Only the creator can delete the task.
-    if (task.createdBy.toString() !== req.user.id) {
+    /*
+     * Only creator can delete.
+     */
+    if (
+      task.createdBy.toString() !==
+      req.user.id.toString()
+    ) {
       return res.status(403).json({
-        message: "Only the task creator can delete this task",
+        message:
+          "Only the task creator can delete this task",
       });
     }
 
@@ -364,10 +651,14 @@ export const deleteWorkspaceTask = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "Task deleted successfully",
+      message:
+        "Task deleted successfully",
     });
   } catch (error) {
-    console.error("Delete workspace task error:", error);
+    console.error(
+      "Delete workspace task error:",
+      error
+    );
 
     return res.status(500).json({
       message: "Failed to delete task",

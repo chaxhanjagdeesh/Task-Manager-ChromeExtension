@@ -263,16 +263,14 @@ export const createInvitation = async (req, res) => {
     });
   }
 };
-
 export const getMyInvitations = async (req, res) => {
   try {
     const invitations = await Invitation.find({
-      $or: [
-        { invitedUser: req.user.id },
-        { invitedEmail: req.user.email.toLowerCase() },
-      ],
+      invitedUser: req.user.id,
       status: "pending",
-      expiresAt: { $gt: new Date() },
+      expiresAt: {
+        $gt: new Date(),
+      },
     })
       .populate("workspace", "name description")
       .populate("invitedBy", "name email")
@@ -289,7 +287,6 @@ export const getMyInvitations = async (req, res) => {
     });
   }
 };
-
 
 export const acceptInvitation = async (req, res) => {
   try {
