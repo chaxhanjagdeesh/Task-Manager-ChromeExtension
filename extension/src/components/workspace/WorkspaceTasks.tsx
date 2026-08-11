@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getWorkspaceTasks,
   updateWorkspaceTask,
@@ -23,11 +17,11 @@ interface WorkspaceTask {
   title: string;
   description?: string;
 
-  createdBy: User | string;
-
   // IMPORTANT:
   // We use participants, not assignedTo.
   participants: (User | string)[];
+
+  createdBy: User | string;
 
   status: "pending" | "in_progress" | "completed";
   priority: "low" | "medium" | "high";
@@ -50,23 +44,33 @@ export default function WorkspaceTasks({
 }: WorkspaceTasksProps) {
   const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updatingTask, setUpdatingTask] =
-    useState<string | null>(null);
+  const [updatingTask, setUpdatingTask] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [currentUser, setCurrentUser] =
-    useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   /*
-   * Used to automatically scroll the task
-   * conversation to the bottom.
+   * Main scrolling container.
    */
-  const tasksContainerRef =
-    useRef<HTMLDivElement | null>(null);
+  const tasksContainerRef = useRef<HTMLDivElement | null>(null);
 
+  /*
+   * Invisible element at the absolute bottom of the task list.
+   *
+   * We scroll to this instead of manipulating scrollHeight directly.
+   * This is much more reliable for a WhatsApp-style interface.
+   */
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  /*
+   * Load current user.
+   */
   useEffect(() => {
     loadCurrentUser();
   }, []);
 
+  /*
+   * Load tasks whenever workspace changes.
+   */
   useEffect(() => {
     if (!workspaceId) return;
 
@@ -74,21 +78,57 @@ export default function WorkspaceTasks({
   }, [workspaceId]);
 
   /*
-   * Automatically scroll to the newest task.
+   * Automatically scroll to the bottom after tasks load/render.
    *
-   * requestAnimationFrame makes sure the task
-   * cards have already rendered before scrolling.
+   * Multiple delayed attempts are intentional because the parent
+   * workspace layout may finish calculating its height slightly
+   * after the task component renders.
    */
   useEffect(() => {
-    if (loading) return;
+    if (loading || tasks.length === 0) return;
+
+    const scrollToBottom = () => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "auto",
+        block: "end",
+      });
+    };
+
+    const timer1 = window.setTimeout(scrollToBottom, 50);
+    const timer2 = window.setTimeout(scrollToBottom, 200);
+    const timer3 = window.setTimeout(scrollToBottom, 500);
+
+    return () => {
+      window.clearTimeout(timer1);
+      window.clearTimeout(timer2);
+      window.clearTimeout(timer3);
+    };
+  }, [loading, tasks]);
+
+  /*
+   * Keep the bottom visible if the task container changes size.
+   *
+   * This helps when the workspace panel itself finishes resizing.
+   */
+  useEffect(() => {
+    if (loading || tasks.length === 0) return;
 
     const container = tasksContainerRef.current;
 
     if (!container) return;
 
-    requestAnimationFrame(() => {
-      container.scrollTop = container.scrollHeight;
+    const observer = new ResizeObserver(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "auto",
+        block: "end",
+      });
     });
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [loading, tasks.length]);
 
   async function loadCurrentUser() {
@@ -104,15 +144,11 @@ export default function WorkspaceTasks({
       setLoading(true);
       setError("");
 
-      const data =
-        await getWorkspaceTasks(workspaceId);
+      const data = await getWorkspaceTasks(workspaceId);
 
       setTasks(data || []);
     } catch (error: any) {
-      console.error(
-        "Failed to load workspace tasks:",
-        error,
-      );
+      console.error("Failed to load workspace tasks:", error);
 
       setError(
         error?.response?.data?.message ||
@@ -124,15 +160,17 @@ export default function WorkspaceTasks({
   }
 
   /*
-   * Get an ID regardless of whether API returns:
+   * Get ID from:
    *
-   * { _id: "..." }
+   * "123"
    *
-   * { id: "..." }
+   * OR
    *
-   * or:
+   * { _id: "123" }
    *
-   * "..."
+   * OR
+   *
+   * { id: "123" }
    */
   function getUserId(
     user: User | string | undefined | null,
@@ -149,16 +187,12 @@ export default function WorkspaceTasks({
   function getCurrentUserId(): string {
     if (!currentUser) return "";
 
-    return (
-      currentUser._id ||
-      currentUser.id ||
-      ""
-    );
+    return currentUser._id || currentUser.id || "";
   }
 
   function getUserName(
     user: User | string | undefined | null,
-  ): string {
+  ) {
     if (!user) {
       return "Unknown user";
     }
@@ -177,8 +211,11 @@ export default function WorkspaceTasks({
   /*
    * Determines LEFT vs RIGHT.
    *
-   * Created by me  -> RIGHT
-   * Created by user -> LEFT
+   * I created task:
+   * RIGHT
+   *
+   * Someone else created task:
+   * LEFT
    */
   function isMyTask(task: WorkspaceTask) {
     const currentUserId = getCurrentUserId();
@@ -187,9 +224,7 @@ export default function WorkspaceTasks({
       return false;
     }
 
-    const creatorId = getUserId(
-      task.createdBy,
-    );
+    const creatorId = getUserId(task.createdBy);
 
     return creatorId === currentUserId;
   }
@@ -212,8 +247,7 @@ export default function WorkspaceTasks({
   }
 
   /*
-   * Only a participant can mark a task
-   * completed/incomplete.
+   * Only a participant can mark the task completed.
    */
   async function handleToggleComplete(
     task: WorkspaceTask,
@@ -265,7 +299,7 @@ export default function WorkspaceTasks({
   }
 
   /*
-   * Only the creator can delete their task.
+   * Only creator can delete task.
    */
   async function handleDelete(
     task: WorkspaceTask,
@@ -314,7 +348,7 @@ export default function WorkspaceTasks({
   /*
    * Completed tasks first.
    *
-   * Incomplete tasks underneath.
+   * Pending tasks underneath.
    */
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -339,15 +373,13 @@ export default function WorkspaceTasks({
     });
   }, [tasks]);
 
-  const completedTasks =
-    sortedTasks.filter(
-      (task) => task.status === "completed",
-    );
+  const completedTasks = sortedTasks.filter(
+    (task) => task.status === "completed",
+  );
 
-  const incompleteTasks =
-    sortedTasks.filter(
-      (task) => task.status !== "completed",
-    );
+  const incompleteTasks = sortedTasks.filter(
+    (task) => task.status !== "completed",
+  );
 
   function formatDate(
     date?: string | null,
@@ -397,130 +429,41 @@ export default function WorkspaceTasks({
         return "bg-emerald-100 text-emerald-700";
 
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-gray-100 text-gray-500";
     }
-  }
-
-  /*
-   * Get initials for participant avatar.
-   */
-  function getInitials(
-    user: User | string | undefined | null,
-  ) {
-    const name = getUserName(user);
-
-    if (!name) return "?";
-
-    const parts = name
-      .trim()
-      .split(/\s+/);
-
-    if (parts.length >= 2) {
-      return (
-        parts[0][0] +
-        parts[parts.length - 1][0]
-      ).toUpperCase();
-    }
-
-    return name
-      .slice(0, 1)
-      .toUpperCase();
-  }
-
-  /*
-   * Render the people assigned to the task.
-   */
-  function renderParticipants(
-    task: WorkspaceTask,
-  ) {
-    const participants =
-      task.participants || [];
-
-    if (participants.length === 0) {
-      return null;
-    }
-
-    const visibleParticipants =
-      participants.slice(0, 3);
-
-    const remaining =
-      participants.length - 3;
-
-    return (
-      <div className="flex items-center gap-1.5">
-        <span className="text-[9px] font-medium text-gray-500">
-          Assigned to
-        </span>
-
-        <div className="flex -space-x-1">
-          {visibleParticipants.map(
-            (person, index) => (
-              <div
-                key={`${getUserId(
-                  person,
-                )}-${index}`}
-                title={getUserName(person)}
-                className="flex h-4 w-4 items-center justify-center rounded-full border border-white bg-gray-200 text-[7px] font-semibold text-gray-600"
-              >
-                {getInitials(person)}
-              </div>
-            ),
-          )}
-        </div>
-
-        <span className="max-w-[180px] truncate text-[9px] text-gray-500">
-          {participants
-            .map((person) =>
-              getUserName(person),
-            )
-            .join(", ")}
-
-          {remaining > 0
-            ? ` +${remaining}`
-            : ""}
-        </span>
-      </div>
-    );
   }
 
   function renderTask(
     task: WorkspaceTask,
   ) {
     const mine = isMyTask(task);
-    const participant =
-      isParticipant(task);
+    const participant = isParticipant(task);
     const completed =
       task.status === "completed";
     const overdue = isOverdue(task);
 
     /*
-     * Color hierarchy:
+     * Color coding:
      *
-     * Completed -> Green
-     * Overdue   -> Red
-     * Mine      -> Blue
-     * Others    -> Purple
+     * Completed → green
+     * Overdue → red
+     * Created by me → blue
+     * Created by someone else → purple
      */
     let cardClass = "";
-    let titleClass = "";
 
     if (completed) {
       cardClass =
-        "border-emerald-200 bg-emerald-50/80";
-      titleClass =
-        "text-emerald-800 line-through";
+        "border-emerald-200 bg-emerald-50/90";
     } else if (overdue) {
       cardClass =
-        "border-red-200 bg-red-50/80";
-      titleClass = "text-red-800";
+        "border-red-200 bg-red-50/90";
     } else if (mine) {
       cardClass =
-        "border-blue-200 bg-blue-50/70";
-      titleClass = "text-blue-900";
+        "border-blue-200 bg-blue-50/80";
     } else {
       cardClass =
-        "border-purple-200 bg-purple-50/70";
-      titleClass = "text-purple-900";
+        "border-purple-200 bg-purple-50/80";
     }
 
     return (
@@ -536,6 +479,7 @@ export default function WorkspaceTasks({
           className={`group relative w-[60%] rounded-xl border px-3 py-2.5 shadow-sm transition ${cardClass}`}
         >
           <div className="flex items-start gap-2.5">
+
             {/* Checkbox */}
             <button
               type="button"
@@ -551,7 +495,7 @@ export default function WorkspaceTasks({
                   ? completed
                     ? "Mark incomplete"
                     : "Mark completed"
-                  : "Only participants can complete this task"
+                  : "Only assigned participants can complete this task"
               }
               className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                 completed
@@ -570,10 +514,15 @@ export default function WorkspaceTasks({
 
             {/* Content */}
             <div className="min-w-0 flex-1">
+
               {/* Title */}
               <div className="flex items-start justify-between gap-2">
                 <h3
-                  className={`text-xs font-semibold ${titleClass}`}
+                  className={`text-xs font-semibold ${
+                    completed
+                      ? "text-emerald-700 line-through"
+                      : "text-gray-900"
+                  }`}
                 >
                   {task.title}
                 </h3>
@@ -585,8 +534,7 @@ export default function WorkspaceTasks({
                       handleDelete(task)
                     }
                     disabled={
-                      updatingTask ===
-                      task._id
+                      updatingTask === task._id
                     }
                     className="hidden text-[11px] text-gray-400 hover:text-red-500 group-hover:block"
                     title="Delete task"
@@ -601,12 +549,8 @@ export default function WorkspaceTasks({
                 <p
                   className={`mt-0.5 text-[10px] leading-4 ${
                     completed
-                      ? "text-emerald-700"
-                      : overdue
-                        ? "text-red-700"
-                        : mine
-                          ? "text-blue-700"
-                          : "text-purple-700"
+                      ? "text-emerald-700/60"
+                      : "text-gray-600"
                   }`}
                 >
                   {task.description}
@@ -615,6 +559,8 @@ export default function WorkspaceTasks({
 
               {/* Metadata */}
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+
+                {/* Priority */}
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize ${priorityClass(
                     task.priority,
@@ -623,6 +569,7 @@ export default function WorkspaceTasks({
                   {task.priority}
                 </span>
 
+                {/* Due date */}
                 {task.dueDate && (
                   <span
                     className={`text-[9px] ${
@@ -630,13 +577,12 @@ export default function WorkspaceTasks({
                         ? "font-semibold text-red-600"
                         : completed
                           ? "text-emerald-600"
-                          : "text-gray-500"
+                          : "text-gray-400"
                     }`}
                   >
                     {overdue
                       ? "Overdue · "
                       : "Due · "}
-
                     {formatDate(
                       task.dueDate,
                     )}
@@ -644,37 +590,37 @@ export default function WorkspaceTasks({
                 )}
               </div>
 
-              {/* Assignment information */}
-              <div className="mt-2 space-y-1 border-t border-black/5 pt-1.5">
-                {/* Assigned To */}
-                {renderParticipants(task)}
-
-                {/* Assigned By */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] font-medium text-gray-500">
-                    Assigned by
+              {/* Assigned To */}
+              {task.participants?.length > 0 && (
+                <div className="mt-1.5 flex items-center gap-1 text-[9px] text-gray-500">
+                  <span className="font-medium text-gray-600">
+                    Assigned to:
                   </span>
 
-                  <div className="flex items-center gap-1">
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[7px] font-semibold text-gray-600">
-                      {getInitials(
-                        task.createdBy,
-                      )}
-                    </div>
-
-                    <span className="max-w-[150px] truncate text-[9px] text-gray-500">
-                      {mine
-                        ? "You"
-                        : getUserName(
-                            task.createdBy,
-                          )}
-                    </span>
-                  </div>
+                  <span className="truncate">
+                    {task.participants
+                      .map((person) =>
+                        getUserName(person),
+                      )
+                      .join(", ")}
+                  </span>
                 </div>
+              )}
+
+              {/* Assigned By */}
+              <div className="mt-0.5 text-[9px] text-gray-500">
+                <span className="font-medium text-gray-600">
+                  Assigned by:
+                </span>{" "}
+                {mine
+                  ? "You"
+                  : getUserName(
+                      task.createdBy,
+                    )}
               </div>
 
               {/* Timestamp */}
-              <div className="mt-1.5 flex items-center justify-between">
+              <div className="mt-1.5 flex items-center justify-between gap-2">
                 <span className="text-[8px] text-gray-400">
                   {formatDate(
                     task.createdAt,
@@ -682,7 +628,7 @@ export default function WorkspaceTasks({
                 </span>
 
                 {completed && (
-                  <span className="text-[8px] font-medium text-emerald-600">
+                  <span className="text-[8px] font-medium text-emerald-700/70">
                     ✓ Completed
                     {task.completedAt
                       ? ` · ${formatDate(
@@ -693,12 +639,11 @@ export default function WorkspaceTasks({
                 )}
               </div>
 
-              {/* Not assigned to current user */}
+              {/* Not assigned */}
               {!participant &&
                 !completed && (
                   <div className="mt-1 text-[8px] text-gray-400">
-                    You are not assigned to
-                    this task.
+                    You are not assigned to this task.
                   </div>
                 )}
             </div>
@@ -710,7 +655,7 @@ export default function WorkspaceTasks({
 
   if (loading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
+      <div className="flex h-full min-h-[430px] items-center justify-center">
         <div className="text-center">
           <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-gray-700" />
 
@@ -723,9 +668,10 @@ export default function WorkspaceTasks({
   }
 
   return (
-    <div className="flex min-h-[430px] flex-col">
+    <div className="flex h-full min-h-0 flex-col">
+
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-5 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
         <div>
           <h2 className="text-sm font-semibold text-gray-900">
             Tasks
@@ -750,7 +696,7 @@ export default function WorkspaceTasks({
 
       {/* Error */}
       {error && (
-        <div className="mx-5 mt-2 flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
+        <div className="mx-5 mt-2 flex shrink-0 items-center justify-between rounded-lg bg-red-50 px-3 py-2">
           <p className="text-[10px] text-red-600">
             {error}
           </p>
@@ -765,10 +711,10 @@ export default function WorkspaceTasks({
         </div>
       )}
 
-      {/* Task area */}
+      {/* Scrollable task area */}
       <div
         ref={tasksContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-4"
       >
         {tasks.length === 0 ? (
           <div className="flex min-h-[350px] flex-col items-center justify-center text-center">
@@ -781,9 +727,9 @@ export default function WorkspaceTasks({
             </h3>
 
             <p className="mt-1 max-w-xs text-[11px] leading-5 text-gray-400">
-              Create a task and assign it
-              to yourself or another
-              workspace member.
+              Create a task and assign it to
+              yourself or another workspace
+              member.
             </p>
 
             <button
@@ -796,6 +742,7 @@ export default function WorkspaceTasks({
           </div>
         ) : (
           <div className="space-y-4">
+
             {/* Completed */}
             {completedTasks.length > 0 && (
               <section>
@@ -804,9 +751,9 @@ export default function WorkspaceTasks({
                     Completed
                   </span>
 
-                  <div className="h-px flex-1 bg-gray-100" />
+                  <div className="h-px flex-1 bg-emerald-100" />
 
-                  <span className="text-[9px] text-gray-400">
+                  <span className="text-[9px] text-emerald-600">
                     {completedTasks.length}
                   </span>
                 </div>
@@ -841,6 +788,20 @@ export default function WorkspaceTasks({
                 </div>
               </section>
             )}
+
+            {/* 
+             * IMPORTANT:
+             * This must ALWAYS be the final element
+             * inside the scrolling area.
+             *
+             * The component scrolls to this element
+             * when the task panel opens/loads.
+             */}
+            <div
+              ref={bottomRef}
+              className="h-px w-full"
+              aria-hidden="true"
+            />
           </div>
         )}
       </div>

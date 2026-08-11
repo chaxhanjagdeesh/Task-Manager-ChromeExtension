@@ -13,5 +13,5 @@ export default defineManifest({
 
   permissions: ["storage"],
 
-  host_permissions: ["http://localhost:5000/*"],
+  host_permissions: ["https://workplaceapi.epayroll.co.in/*"],
 });

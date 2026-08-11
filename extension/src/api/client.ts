@@ -3,7 +3,12 @@ import api from "./api";
 export const getClients = async () => {
   const token = await new Promise<string | null>((resolve) => {
     chrome.storage.local.get("token", (result) => {
-      resolve(result.token || null);
+      const storedToken =
+        typeof result.token === "string"
+          ? result.token
+          : null;
+
+      resolve(storedToken);
     });
   });
 

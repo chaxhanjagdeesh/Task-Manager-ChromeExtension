@@ -12,6 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
+interface StoredUser {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
+}
+
 export default function Profile() {
   const navigate = useNavigate();
 
@@ -52,9 +59,12 @@ export default function Profile() {
       });
 
 chrome.storage.local.get(["user"], (result) => {
+  const storedUser =
+    result.user as StoredUser | undefined;
+
   chrome.storage.local.set({
     user: {
-      ...result.user,
+      ...(storedUser || {}),
       name,
       email,
     },

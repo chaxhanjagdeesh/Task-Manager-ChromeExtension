@@ -72,10 +72,14 @@ export default function WorkspaceMembers({
     try {
       setInvitationsLoading(true);
 
-      const data =
+      const data: any = 
         await getWorkspaceInvitations(workspaceId);
 
-      setInvitations(data);
+      setInvitations(
+  Array.isArray(data)
+    ? data
+    : data?.invitations || []
+);
     } catch (error) {
       console.error(
         "Failed to load workspace invitations:",

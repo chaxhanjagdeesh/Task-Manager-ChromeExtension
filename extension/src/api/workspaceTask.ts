@@ -3,7 +3,12 @@ import api from "./api";
 function getToken(): Promise<string> {
   return new Promise((resolve) => {
     chrome.storage.local.get(["token"], (result) => {
-      resolve(result.token || "");
+      const token =
+        typeof result.token === "string"
+          ? result.token
+          : "";
+
+      resolve(token);
     });
   });
 }
@@ -56,11 +61,11 @@ export async function getWorkspaceTask(
 export async function createWorkspaceTask(
   workspaceId: string,
   task: {
-    title: string;
-    description?: string;
-    assignedTo: string;
-    priority?: "low" | "medium" | "high";
-    dueDate?: string | null;
+  title: string;
+  description?: string;
+  participants: string[];
+  priority?: "low" | "medium" | "high";
+  dueDate?: string;
   }
 ) {
   const token = await getToken();

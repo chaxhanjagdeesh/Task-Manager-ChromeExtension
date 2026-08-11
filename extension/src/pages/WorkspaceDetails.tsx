@@ -19,14 +19,12 @@ interface Workspace {
 
 interface WorkspaceMember {
   _id: string;
-  user:
-  | {
+  user: {
     _id: string;
     name?: string;
     email?: string;
-  }
-  | string;
-  role: "admin" | "user";
+  };
+  role?: "admin" | "user";
 }
 
 export default function WorkspaceDetails() {
@@ -45,8 +43,6 @@ export default function WorkspaceDetails() {
   >([]);
 
   const [loading, setLoading] = useState(true);
-  const [membersLoading, setMembersLoading] =
-    useState(false);
 
   const [error, setError] = useState("");
 
@@ -63,10 +59,9 @@ export default function WorkspaceDetails() {
   }, [workspaceId]);
 
   /*
-   * Load members for task creation.
+   * Load workspace members.
    *
-   * WorkspaceMembers has its own member loading,
-   * but CreateWorkspaceTask also needs the member list.
+   * These members are passed to CreateWorkspaceTask.
    */
   useEffect(() => {
     if (!workspaceId) return;
@@ -90,7 +85,7 @@ export default function WorkspaceDetails() {
 
       setError(
         error?.response?.data?.message ||
-        "Failed to load workspace"
+          "Failed to load workspace"
       );
     } finally {
       setLoading(false);
@@ -99,8 +94,6 @@ export default function WorkspaceDetails() {
 
   async function loadMembers(id: string) {
     try {
-      setMembersLoading(true);
-
       const data = await getWorkspaceMembers(id);
 
       setMembers(data);
@@ -111,8 +104,6 @@ export default function WorkspaceDetails() {
       );
 
       setMembers([]);
-    } finally {
-      setMembersLoading(false);
     }
   }
 
@@ -142,7 +133,7 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => navigate("/workspace")}
-          className="mt-3 rounded-md border px-4 py-2 text-sm hover:bg-gray-50"
+          className="mt-3 rounded-md border px-4 py-2 text-sm transition hover:bg-gray-50"
         >
           Back to Workspaces
         </button>
@@ -156,6 +147,7 @@ export default function WorkspaceDetails() {
       {/* =========================
           Header
       ========================= */}
+
       <div className="flex w-full shrink-0 items-center justify-between border-b px-6 py-4">
 
         <div className="flex min-w-0 items-center gap-3">
@@ -163,7 +155,7 @@ export default function WorkspaceDetails() {
           <button
             type="button"
             onClick={() => navigate("/workspace")}
-            className="shrink-0 rounded-md px-2 py-1 text-sm hover:bg-gray-100"
+            className="shrink-0 rounded-md px-2 py-1 text-sm text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
           >
             ←
           </button>
@@ -191,15 +183,17 @@ export default function WorkspaceDetails() {
       {/* =========================
           Workspace Navigation
       ========================= */}
+
       <div className="flex w-full shrink-0 border-b">
 
         <button
           type="button"
           onClick={() => setActiveTab("tasks")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "tasks"
+          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+            activeTab === "tasks"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-            }`}
+          }`}
         >
           Tasks
         </button>
@@ -207,10 +201,11 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => setActiveTab("notes")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "notes"
+          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+            activeTab === "notes"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-            }`}
+          }`}
         >
           Notes
         </button>
@@ -218,10 +213,11 @@ export default function WorkspaceDetails() {
         <button
           type="button"
           onClick={() => setActiveTab("members")}
-          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "members"
+          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+            activeTab === "members"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-            }`}
+          }`}
         >
           Members
         </button>
@@ -231,9 +227,11 @@ export default function WorkspaceDetails() {
       {/* =========================
           Main Content
       ========================= */}
+
       <div className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
         {/* Tasks */}
+
         {activeTab === "tasks" && (
           <div className="w-full min-w-0">
             <WorkspaceTasks
@@ -246,6 +244,7 @@ export default function WorkspaceDetails() {
         )}
 
         {/* Notes */}
+
         {activeTab === "notes" && (
           <div className="w-full p-6 text-center">
             <p className="text-sm text-gray-500">
@@ -255,6 +254,7 @@ export default function WorkspaceDetails() {
         )}
 
         {/* Members */}
+
         {activeTab === "members" && (
           <div className="w-full min-w-0">
             <WorkspaceMembers
@@ -269,6 +269,7 @@ export default function WorkspaceDetails() {
       {/* =========================
           Create Task Modal
       ========================= */}
+
       {showCreateTask && (
         <CreateWorkspaceTask
           workspaceId={workspace._id}

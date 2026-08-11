@@ -12,12 +12,12 @@ export default function EntryCard({ entry }: Props) {
     minute: "2-digit",
   });
 
-  const icon = {
-    note: "📝",
-    expense: "💰",
-    payment: "💵",
-    todo: "✅",
-  };
+  // const icon = {
+  //   note: "📝",
+  //   expense: "💰",
+  //   payment: "💵",
+  //   todo: "✅",
+  // };
 
   const badgeColor = {
     note: "bg-blue-100 text-blue-700",

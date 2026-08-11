@@ -1,9 +1,14 @@
 import api from "./api";
 
-function getToken() {
-  return new Promise<string>((resolve) => {
+function getToken(): Promise<string> {
+  return new Promise((resolve) => {
     chrome.storage.local.get(["token"], (result) => {
-      resolve(result.token);
+      const token =
+        typeof result.token === "string"
+          ? result.token
+          : "";
+
+      resolve(token);
     });
   });
 }

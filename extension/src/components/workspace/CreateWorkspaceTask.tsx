@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { createWorkspaceTask } from "@/api/workspaceTask";
+// import type { WorkspaceMember } from "@/types/workspace";
 
 interface WorkspaceMember {
   _id: string;
-  user?: {
+  user: {
     _id: string;
     name?: string;
     email?: string;
   };
-  name?: string;
-  email?: string;
-  role?: string;
+  role?: "admin" | "user";
 }
 
 interface CreateWorkspaceTaskProps {
@@ -18,6 +17,13 @@ interface CreateWorkspaceTaskProps {
   members: WorkspaceMember[];
   onClose: () => void;
   onCreated: (task: any) => void;
+}
+
+interface StoredUser {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
 }
 
 export default function CreateWorkspaceTask({
@@ -40,10 +46,13 @@ export default function CreateWorkspaceTask({
 
   useEffect(() => {
     chrome.storage.local.get(["user"], (result) => {
-      if (result.user?._id) {
-        setCurrentUserId(result.user._id);
-      }
-    });
+  const user =
+    result.user as StoredUser | undefined;
+
+  if (user?._id) {
+    setCurrentUserId(user._id);
+  }
+});
   }, []);
 
   /*

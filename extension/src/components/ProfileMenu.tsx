@@ -10,6 +10,13 @@ interface User {
   email?: string;
 }
 
+interface StoredUser {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
+}
+
 export default function ProfileMenu() {
   const [open, setOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] =
@@ -54,11 +61,9 @@ export default function ProfileMenu() {
   }, []);
 
   function loadUser() {
-    chrome.storage.local.get(
-      ["user"],
-      (result) => {
-        const storedUser =
-          result.user || null;
+chrome.storage.local.get(["user"], (result) => {
+  const storedUser =
+    result.user as StoredUser | undefined;
 
         setUser(storedUser);
 

@@ -30,7 +30,7 @@ export default function InvitationModal({
       setLoading(true);
       setError("");
 
-      const data = await getMyInvitations();
+      const data: any = await getMyInvitations();
 
       console.log("INVITATIONS:", data);
 
@@ -39,8 +39,8 @@ export default function InvitationModal({
        * that was already working.
        */
       const list = Array.isArray(data)
-        ? data
-        : data?.invitations || [];
+      ? data
+      : data?.invitations || [];
 
       setInvitations(list);
     } catch (error: any) {
