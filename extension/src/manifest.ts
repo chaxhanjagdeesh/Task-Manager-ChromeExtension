@@ -9,9 +9,29 @@ export default defineManifest({
 
   action: {
     default_popup: "index.html",
+
+    default_title: "Worknest",
+
+    default_icon: {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png",
+    },
   },
 
-  permissions: ["storage"],
+  icons: {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png",
+  },
 
-  host_permissions: ["https://workplaceapi.epayroll.co.in/*"],
+  permissions: [
+    "storage",
+  ],
+
+  host_permissions: [
+    "https://workplaceapi.epayroll.co.in/*",
+  ],
 });

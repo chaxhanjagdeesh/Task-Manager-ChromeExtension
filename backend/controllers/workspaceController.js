@@ -128,7 +128,7 @@ export const getWorkspaceMembers = async (req, res) => {
     const members = await WorkspaceMember.find({
       workspace: id,
     })
-      .populate("user", "name email")
+      .populate("user", "name email lastSeen")
       .sort({ role: 1, joinedAt: 1 });
 
     return res.status(200).json({

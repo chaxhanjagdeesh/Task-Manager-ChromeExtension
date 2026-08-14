@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import WorkspaceMembers from "../components/workspace/WorkspaceMembers";
 import WorkspaceTasks from "../components/workspace/WorkspaceTasks";
 import CreateWorkspaceTask from "../components/workspace/CreateWorkspaceTask";
-
+import WorkspaceChat from "../components/workspace/WorkspaceChat";
 import {
   getWorkspace,
   getWorkspaceMembers,
@@ -32,7 +32,7 @@ export default function WorkspaceDetails() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<
-    "tasks" | "notes" | "members"
+    "tasks" | "chat" | "members"
   >("tasks");
 
   const [workspace, setWorkspace] =
@@ -199,16 +199,16 @@ export default function WorkspaceDetails() {
         </button>
 
         <button
-          type="button"
-          onClick={() => setActiveTab("notes")}
-          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
-            activeTab === "notes"
-              ? "border-b-2 border-gray-900 text-gray-900"
-              : "text-gray-500 hover:bg-gray-50"
-          }`}
-        >
-          Notes
-        </button>
+  type="button"
+  onClick={() => setActiveTab("chat")}
+  className={`flex-1 px-4 py-3 text-sm font-medium ${
+    activeTab === "chat"
+      ? "border-b-2 border-gray-900 text-gray-900"
+      : "text-gray-500 hover:bg-gray-50"
+  }`}
+>
+  Chat
+</button>
 
         <button
           type="button"
@@ -228,30 +228,41 @@ export default function WorkspaceDetails() {
           Main Content
       ========================= */}
 
-      <div className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="min-h-0 w-full min-w-0 flex-1 overflow-hidden">
 
         {/* Tasks */}
 
         {activeTab === "tasks" && (
-          <div className="w-full min-w-0">
-            <WorkspaceTasks
-              workspaceId={workspace._id}
-              onCreateTask={() =>
-                setShowCreateTask(true)
-              }
-            />
-          </div>
-        )}
+  <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
+    {/* Scrollable task area */}
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <WorkspaceTasks
+        workspaceId={workspace._id}
+        onCreateTask={() => setShowCreateTask(true)}
+      />
+    </div>
+
+    {/* Fixed bottom action bar */}
+    {/* <div className="flex shrink-0 items-center justify-end border-t bg-white px-5 py-3">
+      <button
+        type="button"
+        onClick={() => setShowCreateTask(true)}
+        className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800 active:scale-[0.98]"
+      >
+        + New Task
+      </button>
+    </div> */}
+  </div>
+)}
 
         {/* Notes */}
-
-        {activeTab === "notes" && (
-          <div className="w-full p-6 text-center">
-            <p className="text-sm text-gray-500">
-              Workspace notes coming next.
-            </p>
-          </div>
-        )}
+{activeTab === "chat" && (
+  <div className="h-full min-h-0 w-full min-w-0">
+    <WorkspaceChat
+      workspaceId={workspace._id}
+    />
+  </div>
+)}
 
         {/* Members */}
 

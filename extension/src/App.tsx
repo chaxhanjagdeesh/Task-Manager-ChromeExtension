@@ -12,7 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Workspace from "./pages/Workspace";
 import WorkspaceDetails from "./pages/WorkspaceDetails";
-
+import { sendHeartbeat } from "./api/presence";
 import { getToken } from "./utils/storage";
 
 function App() {
@@ -24,6 +24,26 @@ function App() {
   useEffect(() => {
     checkLogin();
   }, [location.pathname]);
+
+
+  useEffect(() => {
+  // Send immediately
+  sendHeartbeat().catch((error) => {
+    console.error("Initial heartbeat failed:", error);
+  });
+
+  // Then every 30 seconds
+  const heartbeatInterval = window.setInterval(() => {
+    sendHeartbeat().catch((error) => {
+      console.error("Heartbeat failed:", error);
+    });
+  }, 30_000);
+
+  return () => {
+    window.clearInterval(heartbeatInterval);
+  };
+}, []);
+
 
   async function checkLogin() {
     try {
