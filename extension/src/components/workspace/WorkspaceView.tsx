@@ -9,7 +9,6 @@ export default function WorkspaceView({
 }: WorkspaceViewProps) {
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-3">
           <button
@@ -36,8 +35,6 @@ export default function WorkspaceView({
           {workspace.role}
         </span>
       </div>
-
-      {/* Workspace navigation */}
       <div className="flex border-b">
         <button className="flex-1 border-b-2 px-4 py-2 text-sm font-medium">
           Tasks
@@ -51,14 +48,11 @@ export default function WorkspaceView({
           Members
         </button>
       </div>
-
-      {/* Content placeholder */}
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
           <h3 className="text-sm font-medium">
             {workspace.name}
           </h3>
-
           <p className="mt-1 text-xs text-gray-500">
             Workspace tasks will appear here.
           </p>

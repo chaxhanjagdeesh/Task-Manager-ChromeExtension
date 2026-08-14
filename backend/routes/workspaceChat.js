@@ -6,9 +6,6 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/*
- * Check whether the user belongs to the workspace.
- */
 async function getWorkspaceMembership(
   workspaceId,
   userId
@@ -21,9 +18,6 @@ async function getWorkspaceMembership(
   return member;
 }
 
-/*
- * GET /api/workspaces/:workspaceId/messages
- */
 router.get(
   "/:workspaceId/messages",
   authMiddleware,
@@ -75,9 +69,6 @@ router.get(
   }
 );
 
-/*
- * POST /api/workspaces/:workspaceId/messages
- */
 router.post(
   "/:workspaceId/messages",
   authMiddleware,
@@ -91,9 +82,6 @@ router.post(
           ? req.body.content.trim()
           : "";
 
-      /*
-       * Validate message
-       */
       if (!content) {
         return res.status(400).json({
           message:
@@ -108,9 +96,6 @@ router.post(
         });
       }
 
-      /*
-       * Check workspace membership
-       */
       const member =
         await getWorkspaceMembership(
           workspaceId,
@@ -124,9 +109,6 @@ router.post(
         });
       }
 
-      /*
-       * Create message
-       */
       const message =
         await Message.create({
           workspace: workspaceId,
@@ -134,9 +116,6 @@ router.post(
           content,
         });
 
-      /*
-       * Return populated message
-       */
       const populatedMessage =
         await Message.findById(
           message._id

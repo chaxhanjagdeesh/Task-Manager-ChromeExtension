@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createWorkspaceTask } from "@/api/workspaceTask";
-// import type { WorkspaceMember } from "@/types/workspace";
 
 interface WorkspaceMember {
   _id: string;
@@ -55,9 +54,6 @@ export default function CreateWorkspaceTask({
 });
   }, []);
 
-  /*
-   * Automatically include yourself.
-   */
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -73,7 +69,6 @@ export default function CreateWorkspaceTask({
   function toggleMember(userId: string) {
     setSelectedMembers((current) => {
       if (current.includes(userId)) {
-        // Creator cannot remove themselves.
         if (userId === currentUserId) {
           return current;
         }
@@ -136,35 +131,21 @@ export default function CreateWorkspaceTask({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]">
-
-      {/* Modal */}
       <div className="flex max-h-[550px] w-full max-w-[510px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
-
-        {/* ================================================= */}
-        {/* HEADER */}
-        {/* ================================================= */}
-
         <div className="shrink-0 border-b border-gray-100 px-5 py-4">
-
           <div className="flex items-start justify-between">
-
             <div className="flex items-center gap-3">
-
-              {/* Task icon */}
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-900 text-lg text-white shadow-sm">
                 ✓
               </div>
-
               <div>
                 <h2 className="text-[15px] font-semibold text-gray-900">
                   Create a task
                 </h2>
-
                 <p className="mt-0.5 text-[11px] text-gray-500">
                   Turn an idea into something actionable.
                 </p>
               </div>
-
             </div>
 
             <button
@@ -179,21 +160,11 @@ export default function CreateWorkspaceTask({
           </div>
 
         </div>
-
-        {/* ================================================= */}
-        {/* SCROLLABLE CONTENT */}
-        {/* ================================================= */}
-
         <form
           onSubmit={handleSubmit}
           className="min-h-0 flex-1 overflow-y-auto"
         >
           <div className="space-y-4 px-5 py-4">
-
-            {/* ================================================= */}
-            {/* TITLE */}
-            {/* ================================================= */}
-
             <div>
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 Task
@@ -211,11 +182,6 @@ export default function CreateWorkspaceTask({
                 className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-3 text-sm font-medium text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-4 focus:ring-gray-100"
               />
             </div>
-
-            {/* ================================================= */}
-            {/* DESCRIPTION */}
-            {/* ================================================= */}
-
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
@@ -238,15 +204,9 @@ export default function CreateWorkspaceTask({
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-4 focus:ring-gray-100"
               />
             </div>
-
-            {/* ================================================= */}
-            {/* ASSIGNEES */}
-            {/* ================================================= */}
-
             <div>
 
               <div className="mb-2 flex items-center justify-between">
-
                 <div>
                   <label className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Assign to
@@ -263,19 +223,15 @@ export default function CreateWorkspaceTask({
 
               </div>
 
-              {/* Selected people */}
               {selectedPeople.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
-
                   {selectedPeople.map((member) => {
                     const userId =
                       member.user?._id || member._id;
-
                     const name =
                       member.user?.name ||
                       member.user?.email ||
                       "User";
-
                     const isSelf =
                       userId === currentUserId;
 
@@ -302,7 +258,6 @@ export default function CreateWorkspaceTask({
                 </div>
               )}
 
-              {/* Members */}
               <div className="max-h-[125px] overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5">
 
                 {members.map((member) => {
@@ -389,22 +344,14 @@ export default function CreateWorkspaceTask({
                 })}
 
               </div>
-
             </div>
-
-            {/* ================================================= */}
-            {/* PRIORITY */}
-            {/* ================================================= */}
 
             <div>
 
               <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 Priority
               </label>
-
               <div className="grid grid-cols-3 gap-2">
-
-                {/* Low */}
                 <button
                   type="button"
                   onClick={() =>
@@ -431,7 +378,6 @@ export default function CreateWorkspaceTask({
                   </div>
                 </button>
 
-                {/* Medium */}
                 <button
                   type="button"
                   onClick={() =>
@@ -458,7 +404,6 @@ export default function CreateWorkspaceTask({
                   </div>
                 </button>
 
-                {/* High */}
                 <button
                   type="button"
                   onClick={() =>
@@ -487,11 +432,6 @@ export default function CreateWorkspaceTask({
 
               </div>
             </div>
-
-            {/* ================================================= */}
-            {/* DUE DATE */}
-            {/* ================================================= */}
-
             <div>
 
               <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
@@ -517,7 +457,6 @@ export default function CreateWorkspaceTask({
 
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5">
                 <span className="text-xs">!</span>
@@ -529,11 +468,6 @@ export default function CreateWorkspaceTask({
             )}
 
           </div>
-
-          {/* ================================================= */}
-          {/* FOOTER */}
-          {/* ================================================= */}
-
           <div className="sticky bottom-0 flex items-center justify-between border-t border-gray-100 bg-white px-5 py-3">
 
             <div className="text-[10px] text-gray-400">

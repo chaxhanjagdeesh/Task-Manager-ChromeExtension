@@ -112,7 +112,6 @@ export const getWorkspaceMembers = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // First verify that the current user belongs to this workspace
     const currentMembership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -124,7 +123,6 @@ export const getWorkspaceMembers = async (req, res) => {
       });
     }
 
-    // Get all members of the workspace
     const members = await WorkspaceMember.find({
       workspace: id,
     })
@@ -161,7 +159,6 @@ export const createInvitation = async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Check that the current user belongs to this workspace.
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -173,14 +170,11 @@ export const createInvitation = async (req, res) => {
       });
     }
 
-    // Only admins can invite users.
     if (membership.role !== "admin") {
       return res.status(403).json({
         message: "Only workspace admins can invite users",
       });
     }
-
-    // The invited account MUST already exist.
     const invitedUser = await User.findOne({
       email: normalizedEmail,
     });
@@ -192,7 +186,6 @@ export const createInvitation = async (req, res) => {
       });
     }
 
-    // Prevent inviting yourself.
     if (
       invitedUser._id.toString() ===
       req.user.id.toString()
@@ -202,7 +195,6 @@ export const createInvitation = async (req, res) => {
       });
     }
 
-    // Check if the user is already a workspace member.
     const existingMembership =
       await WorkspaceMember.findOne({
         workspace: id,
@@ -216,7 +208,6 @@ export const createInvitation = async (req, res) => {
       });
     }
 
-    // Prevent duplicate pending invitations.
     const existingInvitation =
       await Invitation.findOne({
         workspace: id,
@@ -231,7 +222,6 @@ export const createInvitation = async (req, res) => {
       });
     }
 
-    // Invitation expires after 7 days.
     const expiresAt = new Date();
 
     expiresAt.setDate(
@@ -300,7 +290,6 @@ export const acceptInvitation = async (req, res) => {
       });
     }
 
-    // Make sure this invitation belongs to the current user.
     const isRecipient =
       invitation.invitedUser?.toString() === req.user.id ||
       invitation.invitedEmail === req.user.email.toLowerCase();
@@ -326,7 +315,6 @@ export const acceptInvitation = async (req, res) => {
       });
     }
 
-    // Make sure the user isn't already a member.
     const existingMembership = await WorkspaceMember.findOne({
       workspace: invitation.workspace,
       user: req.user.id,
@@ -341,7 +329,6 @@ export const acceptInvitation = async (req, res) => {
       });
     }
 
-    // Create normal user membership.
     const membership = await WorkspaceMember.create({
       workspace: invitation.workspace,
       user: req.user.id,
@@ -415,7 +402,6 @@ export const getWorkspaceInvitations = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verify current user is a workspace member
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -427,7 +413,6 @@ export const getWorkspaceInvitations = async (req, res) => {
       });
     }
 
-    // Only admins should see pending invitations
     if (membership.role !== "admin") {
       return res.status(403).json({
         message:
@@ -435,7 +420,6 @@ export const getWorkspaceInvitations = async (req, res) => {
       });
     }
 
-    // Automatically ignore expired invitations
     const invitations = await Invitation.find({
       workspace: id,
       status: "pending",
@@ -466,7 +450,6 @@ export const revokeInvitation = async (req, res) => {
   try {
     const { id, invitationId } = req.params;
 
-    // Verify current user belongs to workspace
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -478,7 +461,6 @@ export const revokeInvitation = async (req, res) => {
       });
     }
 
-    // Only admins can revoke invitations
     if (membership.role !== "admin") {
       return res.status(403).json({
         message:

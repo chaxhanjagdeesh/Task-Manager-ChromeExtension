@@ -20,7 +20,6 @@ export const updateProfile = async (req, res) => {
   try {
     let { name, email } = req.body;
 
-    // Validation
     if (!name || !email) {
       return res.status(400).json({
         message: "Name and email are required",
@@ -45,7 +44,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Current user
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -54,7 +52,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Check duplicate email
     const existingUser = await User.findOne({
       email,
       _id: { $ne: req.user.id },
@@ -66,7 +63,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Nothing changed
     if (
       user.name === name &&
       user.email === email
@@ -81,7 +77,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Update
     user.name = name;
     user.email = email;
 

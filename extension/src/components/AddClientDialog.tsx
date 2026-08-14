@@ -68,7 +68,6 @@ export default function AddClientDialog({
 
   return (
     <>
-      {/* Add Client Button */}
       <Button
         type="button"
         onClick={() => setOpen(true)}
@@ -78,14 +77,12 @@ export default function AddClientDialog({
         Client
       </Button>
 
-      {/* Dialog */}
       <Dialog
         open={open}
         onOpenChange={handleOpenChange}
       >
         <DialogContent className="w-[420px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl">
 
-          {/* Header */}
           <div className="border-b border-gray-100 bg-gradient-to-br from-gray-50 to-white px-6 pb-5 pt-6">
             <DialogHeader>
               <div className="flex items-start gap-3">
@@ -106,10 +103,7 @@ export default function AddClientDialog({
             </DialogHeader>
           </div>
 
-          {/* Form */}
           <div className="space-y-4 px-6 py-5">
-
-            {/* Name */}
             <div>
               <label className="mb-1.5 block text-[11px] font-medium text-gray-700">
                 Client name
@@ -126,8 +120,6 @@ export default function AddClientDialog({
                 className="h-10 rounded-lg border-gray-200 bg-gray-50/50 text-sm transition focus:bg-white"
               />
             </div>
-
-            {/* Email */}
             <div>
               <label className="mb-1.5 block text-[11px] font-medium text-gray-700">
                 Email
@@ -146,8 +138,6 @@ export default function AddClientDialog({
                 className="h-10 rounded-lg border-gray-200 bg-gray-50/50 text-sm transition focus:bg-white"
               />
             </div>
-
-            {/* Phone */}
             <div>
               <label className="mb-1.5 block text-[11px] font-medium text-gray-700">
                 Phone
@@ -166,16 +156,12 @@ export default function AddClientDialog({
                 className="h-10 rounded-lg border-gray-200 bg-gray-50/50 text-sm transition focus:bg-white"
               />
             </div>
-
           </div>
-
-          {/* Footer */}
           <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/50 px-6 py-4">
 
             <p className="text-[10px] text-gray-400">
               You can edit client details later.
             </p>
-
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -186,7 +172,6 @@ export default function AddClientDialog({
               >
                 Cancel
               </Button>
-
               <Button
                 type="button"
                 disabled={

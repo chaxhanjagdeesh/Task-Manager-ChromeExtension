@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import WorkspaceMembers from "../components/workspace/WorkspaceMembers";
 import WorkspaceTasks from "../components/workspace/WorkspaceTasks";
 import CreateWorkspaceTask from "../components/workspace/CreateWorkspaceTask";
@@ -48,21 +47,12 @@ export default function WorkspaceDetails() {
 
   const [showCreateTask, setShowCreateTask] =
     useState(false);
-
-  /*
-   * Load workspace
-   */
   useEffect(() => {
     if (!workspaceId) return;
 
     loadWorkspace(workspaceId);
   }, [workspaceId]);
 
-  /*
-   * Load workspace members.
-   *
-   * These members are passed to CreateWorkspaceTask.
-   */
   useEffect(() => {
     if (!workspaceId) return;
 
@@ -85,7 +75,7 @@ export default function WorkspaceDetails() {
 
       setError(
         error?.response?.data?.message ||
-          "Failed to load workspace"
+        "Failed to load workspace"
       );
     } finally {
       setLoading(false);
@@ -107,9 +97,6 @@ export default function WorkspaceDetails() {
     }
   }
 
-  /*
-   * Loading state
-   */
   if (loading) {
     return (
       <div className="box-border flex h-[580px] w-[760px] items-center justify-center overflow-hidden bg-white">
@@ -120,9 +107,6 @@ export default function WorkspaceDetails() {
     );
   }
 
-  /*
-   * Error state
-   */
   if (error || !workspace) {
     return (
       <div className="box-border flex h-[580px] w-[760px] flex-col items-center justify-center overflow-hidden bg-white">
@@ -143,15 +127,8 @@ export default function WorkspaceDetails() {
 
   return (
     <div className="box-border flex h-[580px] w-[760px] min-w-0 flex-col overflow-hidden bg-white">
-
-      {/* =========================
-          Header
-      ========================= */}
-
       <div className="flex w-full shrink-0 items-center justify-between border-b px-6 py-4">
-
         <div className="flex min-w-0 items-center gap-3">
-
           <button
             type="button"
             onClick={() => navigate("/workspace")}
@@ -159,112 +136,72 @@ export default function WorkspaceDetails() {
           >
             ←
           </button>
-
           <div className="min-w-0">
             <h1 className="truncate text-sm font-semibold text-gray-900">
               {workspace.name}
             </h1>
-
             {workspace.description && (
               <p className="truncate text-xs text-gray-500">
                 {workspace.description}
               </p>
             )}
           </div>
-
         </div>
-
         <span className="ml-4 shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs capitalize text-gray-600">
           {workspace.role}
         </span>
-
       </div>
-
-      {/* =========================
-          Workspace Navigation
-      ========================= */}
-
       <div className="flex w-full shrink-0 border-b">
-
         <button
           type="button"
           onClick={() => setActiveTab("tasks")}
-          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
-            activeTab === "tasks"
+          className={`flex-1 px-4 py-3 text-sm font-medium transition ${activeTab === "tasks"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Tasks
         </button>
-
         <button
-  type="button"
-  onClick={() => setActiveTab("chat")}
-  className={`flex-1 px-4 py-3 text-sm font-medium ${
-    activeTab === "chat"
-      ? "border-b-2 border-gray-900 text-gray-900"
-      : "text-gray-500 hover:bg-gray-50"
-  }`}
->
-  Chat
-</button>
-
+          type="button"
+          onClick={() => setActiveTab("chat")}
+          className={`flex-1 px-4 py-3 text-sm font-medium ${activeTab === "chat"
+              ? "border-b-2 border-gray-900 text-gray-900"
+              : "text-gray-500 hover:bg-gray-50"
+            }`}
+        >
+          Chat
+        </button>
         <button
           type="button"
           onClick={() => setActiveTab("members")}
-          className={`flex-1 px-4 py-3 text-sm font-medium transition ${
-            activeTab === "members"
+          className={`flex-1 px-4 py-3 text-sm font-medium transition ${activeTab === "members"
               ? "border-b-2 border-gray-900 text-gray-900"
               : "text-gray-500 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Members
         </button>
-
       </div>
-
-      {/* =========================
-          Main Content
-      ========================= */}
-
       <div className="min-h-0 w-full min-w-0 flex-1 overflow-hidden">
-
-        {/* Tasks */}
-
         {activeTab === "tasks" && (
-  <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
-    {/* Scrollable task area */}
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <WorkspaceTasks
-        workspaceId={workspace._id}
-        onCreateTask={() => setShowCreateTask(true)}
-      />
-    </div>
+          <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <WorkspaceTasks
+                workspaceId={workspace._id}
+                onCreateTask={() => setShowCreateTask(true)}
+              />
+            </div>
+          </div>
+        )}
 
-    {/* Fixed bottom action bar */}
-    {/* <div className="flex shrink-0 items-center justify-end border-t bg-white px-5 py-3">
-      <button
-        type="button"
-        onClick={() => setShowCreateTask(true)}
-        className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800 active:scale-[0.98]"
-      >
-        + New Task
-      </button>
-    </div> */}
-  </div>
-)}
-
-        {/* Notes */}
-{activeTab === "chat" && (
-  <div className="h-full min-h-0 w-full min-w-0">
-    <WorkspaceChat
-      workspaceId={workspace._id}
-    />
-  </div>
-)}
-
-        {/* Members */}
+        {activeTab === "chat" && (
+          <div className="h-full min-h-0 w-full min-w-0">
+            <WorkspaceChat
+              workspaceId={workspace._id}
+            />
+          </div>
+        )}
 
         {activeTab === "members" && (
           <div className="w-full min-w-0">
@@ -276,10 +213,6 @@ export default function WorkspaceDetails() {
         )}
 
       </div>
-
-      {/* =========================
-          Create Task Modal
-      ========================= */}
 
       {showCreateTask && (
         <CreateWorkspaceTask

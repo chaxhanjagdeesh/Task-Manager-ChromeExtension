@@ -88,7 +88,6 @@ export default function Workspace() {
 
   return (
     <div className="relative box-border h-[580px] w-[760px] overflow-hidden bg-white px-6 py-6">
-{/* Large bottom-right green leaf decoration */}
 <div
   className="pointer-events-none absolute bottom-0 right-0 z-0 h-[330px] w-[420px] overflow-hidden opacity-35"
   aria-hidden="true"
@@ -99,7 +98,6 @@ export default function Workspace() {
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Main stems */}
     <path
       d="M420 330C355 260 325 205 260 160C195 115 120 85 35 20"
       stroke="#22c55e"
@@ -128,7 +126,6 @@ export default function Workspace() {
       strokeLinecap="round"
     />
 
-    {/* Large leaves */}
     <path
       d="M305 225C270 190 268 160 282 140C315 153 329 187 305 225Z"
       fill="#22c55e"
@@ -196,16 +193,6 @@ export default function Workspace() {
     />
   </svg>
 </div>
-      {/* ================================================= */}
-      {/* Decorative leaf pattern — bottom right */}
-      {/* ================================================= */}
-
-      
-
-      {/* ================================================= */}
-      {/* Header */}
-      {/* ================================================= */}
-
       <div className="relative z-10 flex items-start justify-between">
   <div className="flex items-center gap-3">
     <img
@@ -225,17 +212,8 @@ export default function Workspace() {
     </div>
   </div>
 </div>
-
-      {/* ================================================= */}
-      {/* Top right controls */}
-      {/* ================================================= */}
-
       <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
-
-        {/* Profile */}
         <ProfileMenu />
-
-        {/* Invitations */}
         <button
           type="button"
           onClick={() => setShowInvitations(true)}
@@ -252,27 +230,17 @@ export default function Workspace() {
             </span>
           )}
         </button>
-
       </div>
-
-      {/* ================================================= */}
-      {/* Main Workspace Actions */}
-      {/* ================================================= */}
-
       <div className="relative z-10 mt-7 grid grid-cols-2 gap-4">
-
-        {/* Personal Workspace */}
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
           className="group rounded-2xl border border-gray-200 bg-white/95 p-5 text-left shadow-sm backdrop-blur-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md"
         >
           <div className="flex items-start gap-4">
-
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-xl">
               📝
             </div>
-
             <div className="min-w-0">
               <h2 className="text-base font-semibold text-gray-900">
                 Personal Workspace
@@ -282,15 +250,12 @@ export default function Workspace() {
                 Your personal notes and tasks
               </p>
             </div>
-
           </div>
-
           <div className="mt-5 text-xs font-medium text-gray-400 transition group-hover:text-gray-600">
             Open workspace →
           </div>
         </button>
 
-        {/* Create Workspace */}
         <button
           type="button"
           onClick={() =>
@@ -320,13 +285,7 @@ export default function Workspace() {
             Create workspace →
           </div>
         </button>
-
       </div>
-
-      {/* ================================================= */}
-      {/* Team Workspaces */}
-      {/* ================================================= */}
-
       <div className="relative z-10 mt-8">
 
         <div className="mb-3 flex items-center justify-between">
@@ -349,7 +308,6 @@ export default function Workspace() {
 
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="flex h-32 items-center justify-center rounded-2xl border border-gray-200 bg-white/80">
             <p className="text-sm text-gray-500">
@@ -358,7 +316,6 @@ export default function Workspace() {
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <div className="flex h-32 flex-col items-center justify-center rounded-2xl border border-red-200 bg-red-50/50">
 
@@ -377,7 +334,6 @@ export default function Workspace() {
           </div>
         )}
 
-        {/* Empty */}
         {!loading &&
           !error &&
           workspaces.length === 0 && (
@@ -399,7 +355,6 @@ export default function Workspace() {
             </div>
           )}
 
-        {/* Workspace Grid */}
         {!loading &&
           !error &&
           workspaces.length > 0 && (
@@ -416,28 +371,18 @@ export default function Workspace() {
                 >
 
                   <div className="flex items-start gap-3">
-
-                    {/* Workspace icon */}
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-sm font-semibold text-gray-700">
                       {getInitial(workspace.name)}
                     </div>
-
                     <div className="min-w-0 flex-1">
-
-                      {/* Name + role */}
                       <div className="flex items-start justify-between gap-2">
-
                         <h3 className="truncate text-sm font-semibold text-gray-900">
                           {workspace.name}
                         </h3>
-
                         <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium capitalize text-gray-500">
                           {workspace.role}
                         </span>
-
                       </div>
-
-                      {/* Description */}
                       {workspace.description ? (
                         <p className="mt-1 line-clamp-2 text-xs leading-4 text-gray-500">
                           {workspace.description}
@@ -447,16 +392,11 @@ export default function Workspace() {
                           Team workspace
                         </p>
                       )}
-
                     </div>
-
                   </div>
-
-                  {/* Open */}
                   <div className="mt-4 text-xs font-medium text-gray-400 transition group-hover:text-gray-700">
                     Open workspace →
                   </div>
-
                 </button>
               ))}
 
@@ -464,11 +404,6 @@ export default function Workspace() {
           )}
 
       </div>
-
-      {/* ================================================= */}
-      {/* Modals */}
-      {/* ================================================= */}
-
       {showCreateWorkspace && (
         <CreateWorkspace
           onClose={() =>

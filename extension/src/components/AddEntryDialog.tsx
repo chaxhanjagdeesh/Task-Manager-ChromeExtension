@@ -1,15 +1,11 @@
 import { useState } from "react";
-
 import { createEntry } from "@/api/entry";
-
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-
 type Props = {
   clientId: string;
   refreshEntries: () => Promise<void>;
 };
-
 const entryTypes = [
   {
     value: "note",
@@ -96,7 +92,6 @@ export default function AddEntryDialog({
 
   return (
     <>
-      {/* Trigger */}
       <Button
         type="button"
         onClick={() => setOpen(true)}
@@ -110,13 +105,7 @@ export default function AddEntryDialog({
           className="fixed inset-0 z-[9999] bg-black/30 backdrop-blur-[2px]"
           onClick={handleClose}
         >
-          {/* 
-            IMPORTANT:
-            Do not center this vertically.
 
-            The extension viewport is only around 580px high,
-            so we explicitly keep the modal inside the viewport.
-          */}
           <div
             className="absolute left-1/2 top-3 flex w-[430px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
             style={{
@@ -124,10 +113,7 @@ export default function AddEntryDialog({
             }}
             onClick={(event) => event.stopPropagation()}
           >
-            {/* Top accent */}
             <div className="h-1 shrink-0 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-300" />
-
-            {/* Header */}
             <div className="shrink-0 border-b border-gray-100 px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
@@ -157,13 +143,7 @@ export default function AddEntryDialog({
               </div>
             </div>
 
-            {/* 
-              SCROLLABLE CONTENT
-
-              This is the only section that scrolls.
-            */}
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-              {/* Entry Type */}
               <div>
                 <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500">
                   Entry type
@@ -226,7 +206,6 @@ export default function AddEntryDialog({
                 </div>
               </div>
 
-              {/* Title */}
               <div className="mt-4">
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500">
                   Title
@@ -250,7 +229,6 @@ export default function AddEntryDialog({
                 />
               </div>
 
-              {/* Description */}
               {(type === "note" ||
                 type === "expense" ||
                 type === "todo") && (
@@ -277,7 +255,6 @@ export default function AddEntryDialog({
                 </div>
               )}
 
-              {/* Amount */}
               {(type === "expense" ||
                 type === "payment") && (
                 <div className="mt-4">
@@ -304,7 +281,6 @@ export default function AddEntryDialog({
                 </div>
               )}
 
-              {/* Todo Status */}
               {type === "todo" && (
                 <div className="mt-4">
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500">
@@ -342,50 +318,8 @@ export default function AddEntryDialog({
                   </div>
                 </div>
               )}
-
-              {/* Billing */}
-              {/* {type === "expense" && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsBilled(!isBilled)
-                  }
-                  className={`mt-4 flex w-full items-center justify-between rounded-xl border p-3 text-left transition ${
-                    isBilled
-                      ? "border-gray-300 bg-gray-50"
-                      : "border-gray-200 bg-white hover:bg-gray-50"
-                  }`}
-                >
-                  <div>
-                    <p className="text-[11px] font-medium text-gray-800">
-                      Bill this expense
-                    </p>
-
-                    <p className="mt-0.5 text-[9px] text-gray-400">
-                      Include this expense in billing.
-                    </p>
-                  </div>
-
-                  <div
-                    className={`flex h-5 w-9 items-center rounded-full p-0.5 transition ${
-                      isBilled
-                        ? "bg-gray-900"
-                        : "bg-gray-200"
-                    }`}
-                  >
-                    <div
-                      className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                        isBilled
-                          ? "translate-x-4"
-                          : "translate-x-0"
-                      }`}
-                    />
-                  </div>
-                </button>
-              )} */}
             </div>
 
-            {/* Footer */}
             <div className="shrink-0 border-t border-gray-100 bg-gray-50/70 px-5 py-3">
               <div className="flex items-center justify-end gap-2">
                 <Button

@@ -58,24 +58,24 @@ export default function Profile() {
         email,
       });
 
-chrome.storage.local.get(["user"], (result) => {
-  const storedUser =
-    result.user as StoredUser | undefined;
+      chrome.storage.local.get(["user"], (result) => {
+        const storedUser =
+          result.user as StoredUser | undefined;
 
-  chrome.storage.local.set({
-    user: {
-      ...(storedUser || {}),
-      name,
-      email,
-    },
-  });
-});
+        chrome.storage.local.set({
+          user: {
+            ...(storedUser || {}),
+            name,
+            email,
+          },
+        });
+      });
 
       alert("Profile updated.");
     } catch (err: any) {
       alert(
         err.response?.data?.message ||
-          "Something went wrong"
+        "Something went wrong"
       );
     }
   }
@@ -98,7 +98,7 @@ chrome.storage.local.get(["user"], (result) => {
     } catch (err: any) {
       alert(
         err.response?.data?.message ||
-          "Something went wrong"
+        "Something went wrong"
       );
     }
   }
@@ -139,30 +139,30 @@ chrome.storage.local.get(["user"], (result) => {
 
       <Card className="w-[760px] space-y-6 p-6">
 
-<div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
 
-  <button
-    onClick={() => navigate("/dashboard")}
-    className="rounded-full p-2 hover:bg-gray-100"
-  >
-    <ArrowLeft size={22} />
-  </button>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="rounded-full p-2 hover:bg-gray-100"
+          >
+            <ArrowLeft size={22} />
+          </button>
 
-<div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
 
-  <button
-    onClick={() => navigate(-1)}
-    className="rounded-full p-2 hover:bg-gray-100"
-  >
-  </button>
+            <button
+              onClick={() => navigate(-1)}
+              className="rounded-full p-2 hover:bg-gray-100"
+            >
+            </button>
 
-  <h1 className="text-2xl font-bold">
-    My Profile
-  </h1>
+            <h1 className="text-2xl font-bold">
+              My Profile
+            </h1>
 
-</div>
+          </div>
 
-</div>
+        </div>
 
         <div className="space-y-3">
 

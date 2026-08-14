@@ -71,14 +71,7 @@ export default function WorkspaceMembers({
   const [revokeLoading, setRevokeLoading] =
     useState<string | null>(null);
 
-  /*
-   * =====================================================
-   * CHECK ONLINE STATUS
-   * =====================================================
-   *
-   * A user is considered online if their last heartbeat
-   * was received within the last 60 seconds.
-   */
+
   function isUserOnline(lastSeen?: string | null) {
     if (!lastSeen) {
       return false;
@@ -95,52 +88,42 @@ export default function WorkspaceMembers({
 
 
   function getLastSeenText(lastSeen?: string | null) {
-  if (!lastSeen) {
-    return "Never";
+    if (!lastSeen) {
+      return "Never";
+    }
+
+    const lastSeenTime = new Date(lastSeen).getTime();
+
+    if (Number.isNaN(lastSeenTime)) {
+      return "Unknown";
+    }
+
+    const difference = Date.now() - lastSeenTime;
+
+    const seconds = Math.floor(difference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+
+    if (seconds < 60) {
+      return "just now";
+    }
+    if (minutes < 60) {
+      return `${minutes} min ago`;
+    }
+    if (hours < 24) {
+      return `${hours} hr ago`;
+    }
+    if (days < 7) {
+      return `${days} day${days === 1 ? "" : "s"} ago`;
+    }
+    if (weeks < 5) {
+      return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+    }
+    return `${months} month${months === 1 ? "" : "s"} ago`;
   }
-
-  const lastSeenTime = new Date(lastSeen).getTime();
-
-  if (Number.isNaN(lastSeenTime)) {
-    return "Unknown";
-  }
-
-  const difference = Date.now() - lastSeenTime;
-
-  const seconds = Math.floor(difference / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const weeks = Math.floor(days / 7);
-  const months = Math.floor(days / 30);
-
-  if (seconds < 60) {
-    return "just now";
-  }
-
-  if (minutes < 60) {
-    return `${minutes} min ago`;
-  }
-
-  if (hours < 24) {
-    return `${hours} hr ago`;
-  }
-
-  if (days < 7) {
-    return `${days} day${days === 1 ? "" : "s"} ago`;
-  }
-
-  if (weeks < 5) {
-    return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
-  }
-
-  return `${months} month${months === 1 ? "" : "s"} ago`;
-}
-  /*
-   * =====================================================
-   * LOAD INVITATIONS
-   * =====================================================
-   */
 
   async function loadInvitations() {
     if (!isAdmin) {
@@ -170,12 +153,6 @@ export default function WorkspaceMembers({
     }
   }
 
-  /*
-   * =====================================================
-   * LOAD MEMBERS
-   * =====================================================
-   */
-
   async function loadMembers() {
     try {
       setLoading(true);
@@ -197,7 +174,7 @@ export default function WorkspaceMembers({
 
       setError(
         error?.response?.data?.message ||
-          "Failed to load members"
+        "Failed to load members"
       );
 
       setMembers([]);
@@ -206,25 +183,13 @@ export default function WorkspaceMembers({
     }
   }
 
-  /*
-   * =====================================================
-   * INITIAL LOAD
-   * =====================================================
-   */
+
 
   useEffect(() => {
     loadMembers();
     loadInvitations();
   }, [workspaceId, isAdmin]);
 
-  /*
-   * =====================================================
-   * REFRESH MEMBER PRESENCE
-   * =====================================================
-   *
-   * Refresh the member list every 30 seconds so that
-   * online/offline status stays reasonably current.
-   */
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -236,11 +201,7 @@ export default function WorkspaceMembers({
     };
   }, [workspaceId]);
 
-  /*
-   * =====================================================
-   * REVOKE INVITATION
-   * =====================================================
-   */
+ 
 
   async function handleRevokeInvitation(
     invitationId: string
@@ -267,18 +228,13 @@ export default function WorkspaceMembers({
 
       setInviteError(
         error?.response?.data?.message ||
-          "Failed to revoke invitation"
+        "Failed to revoke invitation"
       );
     } finally {
       setRevokeLoading(null);
     }
   }
 
-  /*
-   * =====================================================
-   * INVITE MEMBER
-   * =====================================================
-   */
 
   async function handleInvite(
     event: React.FormEvent<HTMLFormElement>
@@ -323,18 +279,13 @@ export default function WorkspaceMembers({
 
       setInviteError(
         error?.response?.data?.message ||
-          "Failed to create invitation"
+        "Failed to create invitation"
       );
     } finally {
       setInviteLoading(false);
     }
   }
 
-  /*
-   * =====================================================
-   * USER HELPERS
-   * =====================================================
-   */
 
   function getUserName(
     user: MemberUser | string
@@ -366,11 +317,6 @@ export default function WorkspaceMembers({
     );
   }
 
-  /*
-   * =====================================================
-   * LOADING
-   * =====================================================
-   */
 
   if (loading) {
     return (
@@ -381,12 +327,6 @@ export default function WorkspaceMembers({
       </div>
     );
   }
-
-  /*
-   * =====================================================
-   * ERROR
-   * =====================================================
-   */
 
   if (error) {
     return (
@@ -406,16 +346,9 @@ export default function WorkspaceMembers({
     );
   }
 
-  /*
-   * =====================================================
-   * RENDER
-   * =====================================================
-   */
-
   return (
     <div className="p-5">
 
-      {/* Header */}
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h2 className="text-base font-semibold text-gray-900">
@@ -442,7 +375,6 @@ export default function WorkspaceMembers({
         )}
       </div>
 
-      {/* Invite Form */}
       {showInvite && (
         <form
           onSubmit={handleInvite}
@@ -509,7 +441,6 @@ export default function WorkspaceMembers({
         </form>
       )}
 
-      {/* Pending Invitations */}
       {isAdmin && (
         <div className="mb-5 w-full">
           <button
@@ -603,7 +534,7 @@ export default function WorkspaceMembers({
                         className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {revokeLoading ===
-                        invitation._id
+                          invitation._id
                           ? "Revoking..."
                           : "Revoke"}
                       </button>
@@ -616,7 +547,6 @@ export default function WorkspaceMembers({
         </div>
       )}
 
-      {/* Members */}
       {members.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center">
           <p className="text-sm text-gray-500">
@@ -626,11 +556,6 @@ export default function WorkspaceMembers({
       ) : (
         <div className="space-y-2">
           {members.map((member) => {
-            /*
-             * The user can either be:
-             * - a populated user object
-             * - a string user ID
-             */
             const user =
               typeof member.user === "string"
                 ? null
@@ -646,23 +571,18 @@ export default function WorkspaceMembers({
                 className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3 transition hover:border-gray-300 hover:shadow-sm"
               >
                 <div className="flex min-w-0 items-center gap-3">
-
-                  {/* Avatar + online indicator */}
                   <div className="relative">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-sm font-semibold text-gray-700">
                       {getInitial(member.user)}
                     </div>
 
                     <span
-                      className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
-                        online
+                      className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${online
                           ? "bg-emerald-500"
                           : "bg-gray-300"
-                      }`}
+                        }`}
                     />
                   </div>
-
-                  {/* User information */}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-sm font-medium text-gray-900">
@@ -682,21 +602,18 @@ export default function WorkspaceMembers({
                       </p>
                     )}
 
-                   {!online && user?.lastSeen && (
-  <p className="mt-0.5 text-[10px] text-gray-400">
-    Last seen {getLastSeenText(user.lastSeen)}
-  </p>
-)}
+                    {!online && user?.lastSeen && (
+                      <p className="mt-0.5 text-[10px] text-gray-400">
+                        Last seen {getLastSeenText(user.lastSeen)}
+                      </p>
+                    )}
                   </div>
                 </div>
-
-                {/* Role */}
                 <span
-                  className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium capitalize ${
-                    member.role === "admin"
+                  className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium capitalize ${member.role === "admin"
                       ? "bg-gray-900 text-white"
                       : "bg-gray-100 text-gray-600"
-                  }`}
+                    }`}
                 >
                   {member.role}
                 </span>

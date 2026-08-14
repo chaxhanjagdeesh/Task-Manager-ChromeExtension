@@ -16,20 +16,13 @@ interface WorkspaceTask {
   _id: string;
   title: string;
   description?: string;
-
-  // IMPORTANT:
-  // We use participants, not assignedTo.
   participants: (User | string)[];
-
   createdBy: User | string;
-
   status: "pending" | "in_progress" | "completed";
   priority: "low" | "medium" | "high";
-
   dueDate?: string | null;
   createdAt: string;
   updatedAt: string;
-
   completedAt?: string | null;
 }
 
@@ -47,43 +40,19 @@ export default function WorkspaceTasks({
   const [updatingTask, setUpdatingTask] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  /*
-   * Main scrolling container.
-   */
   const tasksContainerRef = useRef<HTMLDivElement | null>(null);
-
-  /*
-   * Invisible element at the absolute bottom of the task list.
-   *
-   * We scroll to this instead of manipulating scrollHeight directly.
-   * This is much more reliable for a WhatsApp-style interface.
-   */
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  /*
-   * Load current user.
-   */
   useEffect(() => {
     loadCurrentUser();
   }, []);
 
-  /*
-   * Load tasks whenever workspace changes.
-   */
   useEffect(() => {
     if (!workspaceId) return;
 
     loadTasks();
   }, [workspaceId]);
 
-  /*
-   * Automatically scroll to the bottom after tasks load/render.
-   *
-   * Multiple delayed attempts are intentional because the parent
-   * workspace layout may finish calculating its height slightly
-   * after the task component renders.
-   */
   useEffect(() => {
     if (loading || tasks.length === 0) return;
 
@@ -105,11 +74,6 @@ export default function WorkspaceTasks({
     };
   }, [loading, tasks]);
 
-  /*
-   * Keep the bottom visible if the task container changes size.
-   *
-   * This helps when the workspace panel itself finishes resizing.
-   */
   useEffect(() => {
     if (loading || tasks.length === 0) return;
 
@@ -159,19 +123,6 @@ export default function WorkspaceTasks({
     }
   }
 
-  /*
-   * Get ID from:
-   *
-   * "123"
-   *
-   * OR
-   *
-   * { _id: "123" }
-   *
-   * OR
-   *
-   * { id: "123" }
-   */
   function getUserId(
     user: User | string | undefined | null,
   ): string {
@@ -208,15 +159,6 @@ export default function WorkspaceTasks({
     );
   }
 
-  /*
-   * Determines LEFT vs RIGHT.
-   *
-   * I created task:
-   * RIGHT
-   *
-   * Someone else created task:
-   * LEFT
-   */
   function isMyTask(task: WorkspaceTask) {
     const currentUserId = getCurrentUserId();
 
@@ -229,10 +171,6 @@ export default function WorkspaceTasks({
     return creatorId === currentUserId;
   }
 
-  /*
-   * Check whether current user is included
-   * in participants.
-   */
   function isParticipant(task: WorkspaceTask) {
     const currentUserId = getCurrentUserId();
 
@@ -246,9 +184,6 @@ export default function WorkspaceTasks({
     );
   }
 
-  /*
-   * Only a participant can mark the task completed.
-   */
   async function handleToggleComplete(
     task: WorkspaceTask,
   ) {
@@ -298,9 +233,6 @@ export default function WorkspaceTasks({
     }
   }
 
-  /*
-   * Only creator can delete task.
-   */
   async function handleDelete(
     task: WorkspaceTask,
   ) {
@@ -345,11 +277,6 @@ export default function WorkspaceTasks({
     }
   }
 
-  /*
-   * Completed tasks first.
-   *
-   * Pending tasks underneath.
-   */
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
       if (
@@ -442,14 +369,6 @@ export default function WorkspaceTasks({
       task.status === "completed";
     const overdue = isOverdue(task);
 
-    /*
-     * Color coding:
-     *
-     * Completed → green
-     * Overdue → red
-     * Created by me → blue
-     * Created by someone else → purple
-     */
     let cardClass = "";
 
     if (completed) {
@@ -479,8 +398,6 @@ export default function WorkspaceTasks({
           className={`group relative w-[60%] rounded-xl border px-3 py-2.5 shadow-sm transition ${cardClass}`}
         >
           <div className="flex items-start gap-2.5">
-
-            {/* Checkbox */}
             <button
               type="button"
               disabled={
@@ -511,11 +428,7 @@ export default function WorkspaceTasks({
                 </span>
               )}
             </button>
-
-            {/* Content */}
             <div className="min-w-0 flex-1">
-
-              {/* Title */}
               <div className="flex items-start justify-between gap-2">
                 <h3
                   className={`text-xs font-semibold ${
@@ -543,8 +456,6 @@ export default function WorkspaceTasks({
                   </button>
                 )}
               </div>
-
-              {/* Description */}
               {task.description && (
                 <p
                   className={`mt-0.5 text-[10px] leading-4 ${
@@ -556,11 +467,7 @@ export default function WorkspaceTasks({
                   {task.description}
                 </p>
               )}
-
-              {/* Metadata */}
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-
-                {/* Priority */}
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize ${priorityClass(
                     task.priority,
@@ -568,8 +475,6 @@ export default function WorkspaceTasks({
                 >
                   {task.priority}
                 </span>
-
-                {/* Due date */}
                 {task.dueDate && (
                   <span
                     className={`text-[9px] ${
@@ -589,8 +494,6 @@ export default function WorkspaceTasks({
                   </span>
                 )}
               </div>
-
-              {/* Assigned To */}
               {task.participants?.length > 0 && (
                 <div className="mt-1.5 flex items-center gap-1 text-[9px] text-gray-500">
                   <span className="font-medium text-gray-600">
@@ -606,8 +509,6 @@ export default function WorkspaceTasks({
                   </span>
                 </div>
               )}
-
-              {/* Assigned By */}
               <div className="mt-0.5 text-[9px] text-gray-500">
                 <span className="font-medium text-gray-600">
                   Assigned by:
@@ -618,8 +519,6 @@ export default function WorkspaceTasks({
                       task.createdBy,
                     )}
               </div>
-
-              {/* Timestamp */}
               <div className="mt-1.5 flex items-center justify-between gap-2">
                 <span className="text-[8px] text-gray-400">
                   {formatDate(
@@ -638,8 +537,6 @@ export default function WorkspaceTasks({
                   </span>
                 )}
               </div>
-
-              {/* Not assigned */}
               {!participant &&
                 !completed && (
                   <div className="mt-1 text-[8px] text-gray-400">
@@ -658,7 +555,6 @@ export default function WorkspaceTasks({
       <div className="flex h-full min-h-[430px] items-center justify-center">
         <div className="text-center">
           <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-gray-700" />
-
           <p className="mt-2 text-xs text-gray-500">
             Loading tasks...
           </p>
@@ -669,14 +565,11 @@ export default function WorkspaceTasks({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-
-      {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
         <div>
           <h2 className="text-sm font-semibold text-gray-900">
             Tasks
           </h2>
-
           <p className="mt-0.5 text-[10px] text-gray-400">
             {tasks.length}{" "}
             {tasks.length === 1
@@ -693,8 +586,6 @@ export default function WorkspaceTasks({
           + New Task
         </button>
       </div>
-
-      {/* Error */}
       {error && (
         <div className="mx-5 mt-2 flex shrink-0 items-center justify-between rounded-lg bg-red-50 px-3 py-2">
           <p className="text-[10px] text-red-600">
@@ -710,8 +601,6 @@ export default function WorkspaceTasks({
           </button>
         </div>
       )}
-
-      {/* Scrollable task area */}
       <div
         ref={tasksContainerRef}
         className="min-h-0 flex-1 overflow-y-auto px-4 py-4"
@@ -742,8 +631,6 @@ export default function WorkspaceTasks({
           </div>
         ) : (
           <div className="space-y-4">
-
-            {/* Completed */}
             {completedTasks.length > 0 && (
               <section>
                 <div className="mb-2 flex items-center gap-2">
@@ -765,8 +652,6 @@ export default function WorkspaceTasks({
                 </div>
               </section>
             )}
-
-            {/* Pending */}
             {incompleteTasks.length > 0 && (
               <section>
                 <div className="mb-2 flex items-center gap-2">
@@ -788,15 +673,6 @@ export default function WorkspaceTasks({
                 </div>
               </section>
             )}
-
-            {/* 
-             * IMPORTANT:
-             * This must ALWAYS be the final element
-             * inside the scrolling area.
-             *
-             * The component scrolls to this element
-             * when the task panel opens/loads.
-             */}
             <div
               ref={bottomRef}
               className="h-px w-full"

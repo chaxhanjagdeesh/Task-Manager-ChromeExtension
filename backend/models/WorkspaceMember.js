@@ -31,7 +31,6 @@ const workspaceMemberSchema = new mongoose.Schema(
   }
 );
 
-// A user can only be a member of the same workspace once.
 workspaceMemberSchema.index(
   { workspace: 1, user: 1 },
   { unique: true }

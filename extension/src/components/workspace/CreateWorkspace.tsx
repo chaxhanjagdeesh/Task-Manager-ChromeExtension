@@ -65,7 +65,6 @@ export default function CreateWorkspace({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
 
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
@@ -87,12 +86,10 @@ export default function CreateWorkspace({
           </button>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="mt-6 space-y-4"
         >
-          {/* Name */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
               Workspace name
@@ -112,7 +109,6 @@ export default function CreateWorkspace({
             />
           </div>
 
-          {/* Description */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
               Description
@@ -134,14 +130,12 @@ export default function CreateWorkspace({
             />
           </div>
 
-          {/* Error */}
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-500">
               {error}
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
 
             <button

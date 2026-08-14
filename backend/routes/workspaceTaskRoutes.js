@@ -11,35 +11,26 @@ import {
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-/*
- * /api/workspaces/:id/tasks
- */
-
 router.post(
   "/:id/tasks",
   authMiddleware,
   createWorkspaceTask
 );
-
 router.get(
   "/:id/tasks",
   authMiddleware,
   getWorkspaceTasks
 );
-
 router.get(
   "/:id/tasks/:taskId",
   authMiddleware,
   getWorkspaceTask
 );
-
 router.put(
   "/:id/tasks/:taskId",
   authMiddleware,
   updateWorkspaceTask
 );
-
 router.delete(
   "/:id/tasks/:taskId",
   authMiddleware,

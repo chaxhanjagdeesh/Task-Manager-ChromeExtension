@@ -13,10 +13,7 @@ function getToken(): Promise<string> {
   });
 }
 
-/**
- * Get all tasks visible to the current user
- * inside a workspace.
- */
+
 export async function getWorkspaceTasks(
   workspaceId: string
 ) {
@@ -34,9 +31,7 @@ export async function getWorkspaceTasks(
   return data.tasks || [];
 }
 
-/**
- * Get one workspace task.
- */
+
 export async function getWorkspaceTask(
   workspaceId: string,
   taskId: string
@@ -55,9 +50,7 @@ export async function getWorkspaceTask(
   return data.task;
 }
 
-/**
- * Create a new task.
- */
+
 export async function createWorkspaceTask(
   workspaceId: string,
   task: {
@@ -83,12 +76,6 @@ export async function createWorkspaceTask(
   return data.task;
 }
 
-/**
- * Update a task.
- *
- * Status can be changed by the assigned user.
- * Other task details will be controlled by the backend.
- */
 export async function updateWorkspaceTask(
   workspaceId: string,
   taskId: string,
@@ -116,9 +103,6 @@ export async function updateWorkspaceTask(
   return data.task;
 }
 
-/**
- * Delete a task.
- */
 export async function deleteWorkspaceTask(
   workspaceId: string,
   taskId: string

@@ -27,37 +27,28 @@ function App() {
 
 
   useEffect(() => {
-  // Send immediately
-  sendHeartbeat().catch((error) => {
-    console.error("Initial heartbeat failed:", error);
-  });
-
-  // Then every 30 seconds
-  const heartbeatInterval = window.setInterval(() => {
     sendHeartbeat().catch((error) => {
-      console.error("Heartbeat failed:", error);
+      console.error("Initial heartbeat failed:", error);
     });
-  }, 30_000);
-
-  return () => {
-    window.clearInterval(heartbeatInterval);
-  };
-}, []);
-
-
+    const heartbeatInterval = window.setInterval(() => {
+      sendHeartbeat().catch((error) => {
+        console.error("Heartbeat failed:", error);
+      });
+    }, 30_000);
+    return () => {
+      window.clearInterval(heartbeatInterval);
+    };
+  }, []);
   async function checkLogin() {
     try {
       setLoading(true);
-
       const token = await getToken();
-
       setLoggedIn(Boolean(token));
     } catch (error) {
       console.error(
         "Failed to check login:",
         error
       );
-
       setLoggedIn(false);
     } finally {
       setLoading(false);
@@ -76,7 +67,6 @@ function App() {
 
   return (
     <Routes>
-      {/* Root */}
       <Route
         path="/"
         element={
@@ -90,8 +80,6 @@ function App() {
           />
         }
       />
-
-      {/* Login */}
       <Route
         path="/login"
         element={
@@ -105,8 +93,6 @@ function App() {
           )
         }
       />
-
-      {/* Register */}
       <Route
         path="/register"
         element={
@@ -120,8 +106,6 @@ function App() {
           )
         }
       />
-
-      {/* Workspace home */}
       <Route
         path="/workspace"
         element={
@@ -135,8 +119,6 @@ function App() {
           )
         }
       />
-
-      {/* Individual workspace */}
       <Route
         path="/workspace/:workspaceId"
         element={
@@ -150,8 +132,6 @@ function App() {
           )
         }
       />
-
-      {/* Dashboard */}
       <Route
         path="/dashboard"
         element={
@@ -165,8 +145,6 @@ function App() {
           )
         }
       />
-
-      {/* Profile */}
       <Route
         path="/profile"
         element={
@@ -180,8 +158,6 @@ function App() {
           )
         }
       />
-
-      {/* Unknown route */}
       <Route
         path="*"
         element={

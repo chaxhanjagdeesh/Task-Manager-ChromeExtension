@@ -29,15 +29,8 @@ export default function InvitationModal({
     try {
       setLoading(true);
       setError("");
-
       const data: any = await getMyInvitations();
-
       console.log("INVITATIONS:", data);
-
-      /*
-       * Keep this compatible with the response
-       * that was already working.
-       */
       const list = Array.isArray(data)
       ? data
       : data?.invitations || [];
@@ -184,7 +177,6 @@ export default function InvitationModal({
           </div>
         </div>
 
-        {/* Content */}
         <div className="max-h-[430px] overflow-y-auto px-5 py-5">
           {loading ? (
             <div className="flex flex-col items-center py-12">
@@ -234,7 +226,6 @@ export default function InvitationModal({
                     <div className="h-1 bg-gray-900" />
 
                     <div className="p-4">
-                      {/* Workspace */}
                       <div className="flex items-start gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-xl">
                           🏢
@@ -269,7 +260,6 @@ export default function InvitationModal({
                         </div>
                       </div>
 
-                      {/* Invited by */}
                       <div className="mt-4 flex items-center rounded-xl bg-gray-50 px-3 py-2.5">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs shadow-sm">
                           👤
@@ -317,7 +307,6 @@ export default function InvitationModal({
                         )}
                       </div>
 
-                      {/* Buttons */}
                       <div className="mt-4 flex gap-2">
                         <button
                           type="button"
@@ -355,7 +344,6 @@ export default function InvitationModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="border-t border-gray-100 bg-gray-50/70 px-5 py-3">
           <div className="flex items-center justify-between">
             <p className="text-[10px] text-gray-400">

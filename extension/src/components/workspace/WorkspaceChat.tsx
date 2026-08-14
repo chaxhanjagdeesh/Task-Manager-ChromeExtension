@@ -35,9 +35,6 @@ export default function WorkspaceChat({
   const messagesEndRef =
     useRef<HTMLDivElement>(null);
 
-  /*
-   * Get logged-in user ID
-   */
   async function getCurrentUserId(): Promise<string> {
     return new Promise((resolve) => {
       chrome.storage.local.get(
@@ -60,9 +57,6 @@ export default function WorkspaceChat({
     });
   }
 
-  /*
-   * Get authentication token
-   */
   async function getToken(): Promise<string | null> {
     return new Promise((resolve) => {
       chrome.storage.local.get(
@@ -77,9 +71,6 @@ export default function WorkspaceChat({
     });
   }
 
-  /*
-   * Load previous messages
-   */
   async function loadMessages() {
     try {
       setLoading(true);
@@ -106,9 +97,6 @@ export default function WorkspaceChat({
     }
   }
 
-  /*
-   * Initial setup
-   */
   useEffect(() => {
     async function initialize() {
       const userId =
@@ -122,9 +110,6 @@ export default function WorkspaceChat({
     initialize();
   }, [workspaceId]);
 
-  /*
-   * Socket.IO
-   */
   useEffect(() => {
     let socket:
       | ReturnType<typeof getSocket>
@@ -214,18 +199,12 @@ export default function WorkspaceChat({
     };
   }, [workspaceId]);
 
-  /*
-   * Scroll to newest message
-   */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages]);
 
-  /*
-   * Send message
-   */
   async function handleSend() {
     const content = text.trim();
 
@@ -261,10 +240,6 @@ export default function WorkspaceChat({
     setSending(false);
   }
 
-  /*
-   * Enter = send
-   * Shift + Enter = new line
-   */
   function handleKeyDown(
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ) {
@@ -277,9 +252,6 @@ export default function WorkspaceChat({
     }
   }
 
-  /*
-   * Format time
-   */
   function formatTime(date: string) {
     return new Date(date).toLocaleTimeString(
       [],
@@ -290,9 +262,6 @@ export default function WorkspaceChat({
     );
   }
 
-  /*
-   * Get initials
-   */
   function getInitials(
     name?: string,
     email?: string
@@ -316,9 +285,6 @@ export default function WorkspaceChat({
       .toUpperCase();
   }
 
-  /*
-   * Loading
-   */
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center bg-white">
@@ -335,37 +301,7 @@ export default function WorkspaceChat({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-
-      {/* ================= HEADER ================= */}
-
-      {/* <div className="shrink-0 border-b border-gray-100 bg-white px-5 py-4">
-        <div className="flex items-center justify-between">
-
-          <div>
-            <h2 className="text-sm font-semibold text-gray-900">
-              Team Chat
-            </h2>
-
-            <p className="mt-0.5 text-xs text-gray-400">
-              Conversation with your workspace team
-            </p>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
-            <span className="text-[10px] font-medium text-gray-500">
-              Live
-            </span>
-          </div>
-
-        </div>
-      </div> */}
-
-      {/* ================= MESSAGES ================= */}
-
       <div className="min-h-0 flex-1 overflow-y-auto bg-gray-50/60 px-5 py-5">
-
         {error && (
           <div className="mb-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2">
             <p className="text-xs text-red-600">
@@ -421,8 +357,6 @@ export default function WorkspaceChat({
                   }`}
                 >
 
-                  {/* OTHER USER */}
-
                   {!isMine && (
                     <div className="flex max-w-[78%] items-end gap-2">
 
@@ -456,8 +390,6 @@ export default function WorkspaceChat({
                       </div>
                     </div>
                   )}
-
-                  {/* MY MESSAGE */}
 
                   {isMine && (
                     <div className="flex max-w-[78%] flex-col items-end">
@@ -494,12 +426,8 @@ export default function WorkspaceChat({
 
       </div>
 
-      {/* ================= COMPOSER ================= */}
-
       <div className="shrink-0 border-t border-gray-100 bg-white px-4 py-3">
-
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-1.5 shadow-sm">
-
           <div className="flex items-end gap-2">
 
             <textarea

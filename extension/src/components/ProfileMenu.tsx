@@ -19,80 +19,48 @@ interface StoredUser {
 
 export default function ProfileMenu() {
   const [open, setOpen] = useState(false);
-  const [showProfileModal, setShowProfileModal] =
-    useState(false);
-
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-
-  // Profile fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-
-  // Password fields
-  const [currentPassword, setCurrentPassword] =
-    useState("");
-  const [newPassword, setNewPassword] =
-    useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
-
-  // Loading states
-  const [savingProfile, setSavingProfile] =
-    useState(false);
-
-  const [changingPassword, setChangingPassword] =
-    useState(false);
-
-  // Messages
-  const [profileError, setProfileError] =
-    useState("");
-
-  const [profileSuccess, setProfileSuccess] =
-    useState("");
-
-  const [passwordError, setPasswordError] =
-    useState("");
-
-  const [passwordSuccess, setPasswordSuccess] =
-    useState("");
-
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
   useEffect(() => {
     loadUser();
   }, []);
 
   function loadUser() {
-chrome.storage.local.get(["user"], (result) => {
-  const storedUser =
-    result.user as StoredUser | undefined;
-
-        setUser(storedUser);
-
-        setName(
-          storedUser?.name || ""
-        );
-
-        setEmail(
-          storedUser?.email || ""
-        );
-      }
+    chrome.storage.local.get(["user"], (result) => {
+      const storedUser =
+        result.user as StoredUser | undefined;
+      setUser(storedUser);
+      setName(
+        storedUser?.name || ""
+      );
+      setEmail(
+        storedUser?.email || ""
+      );
+    }
     );
   }
 
   function openProfile() {
     setOpen(false);
-
     setProfileError("");
     setProfileSuccess("");
-
     setPasswordError("");
     setPasswordSuccess("");
-
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-
     loadUser();
-
     setShowProfileModal(true);
   }
 
@@ -142,15 +110,6 @@ chrome.storage.local.get(["user"], (result) => {
           email: trimmedEmail,
         });
 
-      /*
-       * Your backend should return:
-       *
-       * {
-       *   message: "...",
-       *   user: {...}
-       * }
-       */
-
       const updatedUser =
         result?.user || {
           ...user,
@@ -160,7 +119,6 @@ chrome.storage.local.get(["user"], (result) => {
 
       setUser(updatedUser);
 
-      // Keep the updated user in extension storage
       await new Promise<void>(
         (resolve) => {
           chrome.storage.local.set(
@@ -182,7 +140,7 @@ chrome.storage.local.get(["user"], (result) => {
 
       setProfileSuccess(
         result?.message ||
-          "Profile updated successfully."
+        "Profile updated successfully."
       );
     } catch (error: any) {
       console.error(
@@ -192,7 +150,7 @@ chrome.storage.local.get(["user"], (result) => {
 
       setProfileError(
         error?.response?.data?.message ||
-          "Failed to update profile."
+        "Failed to update profile."
       );
     } finally {
       setSavingProfile(false);
@@ -255,14 +213,13 @@ chrome.storage.local.get(["user"], (result) => {
           newPassword,
         });
 
-      // Clear password fields after success
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
 
       setPasswordSuccess(
         result?.message ||
-          "Password changed successfully."
+        "Password changed successfully."
       );
     } catch (error: any) {
       console.error(
@@ -272,7 +229,7 @@ chrome.storage.local.get(["user"], (result) => {
 
       setPasswordError(
         error?.response?.data?.message ||
-          "Failed to change password."
+        "Failed to change password."
       );
     } finally {
       setChangingPassword(false);
@@ -287,7 +244,6 @@ chrome.storage.local.get(["user"], (result) => {
 
   return (
     <>
-      {/* Profile button */}
       <div className="relative">
         <button
           type="button"
@@ -313,20 +269,6 @@ chrome.storage.local.get(["user"], (result) => {
         {/* Dropdown */}
         {open && (
           <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-            {/* User information */}
-            {/* <div className="border-b border-gray-100 px-4 py-3">
-              <p className="truncate text-sm font-semibold text-gray-900">
-                {user?.name || "User"}
-              </p>
-
-              {user?.email && (
-                <p className="mt-0.5 truncate text-xs text-gray-500">
-                  {user.email}
-                </p>
-              )}
-            </div> */}
-
-            {/* Manage Profile */}
             <button
               type="button"
               onClick={openProfile}
@@ -338,21 +280,15 @@ chrome.storage.local.get(["user"], (result) => {
                 <span className="block font-medium">
                   Account
                 </span>
-
-                {/* <span className="block text-xs text-gray-400">
-                  Account settings
-                </span> */}
               </span>
             </button>
 
-            {/* Logout */}
             <button
               type="button"
               onClick={logout}
               className="flex w-full items-center gap-3 border-t border-gray-100 px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50"
             >
               <span>🚪</span>
-
               <span className="font-medium">
                 Logout
               </span>
@@ -361,7 +297,6 @@ chrome.storage.local.get(["user"], (result) => {
         )}
       </div>
 
-      {/* Profile Modal */}
       {showProfileModal && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-4"
@@ -373,7 +308,6 @@ chrome.storage.local.get(["user"], (result) => {
               event.stopPropagation()
             }
           >
-            {/* Modal header */}
             <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
               <div>
                 <h2 className="text-base font-semibold text-gray-900">
@@ -398,7 +332,6 @@ chrome.storage.local.get(["user"], (result) => {
               </button>
             </div>
 
-            {/* Account details */}
             <div className="px-6 py-5">
               <h3 className="text-sm font-semibold text-gray-900">
                 Account Details
@@ -412,7 +345,6 @@ chrome.storage.local.get(["user"], (result) => {
                 onSubmit={handleProfileSave}
                 className="mt-4 space-y-4"
               >
-                {/* Name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600">
                     Name
@@ -431,7 +363,6 @@ chrome.storage.local.get(["user"], (result) => {
                   />
                 </div>
 
-                {/* Email */}
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600">
                     Email
@@ -449,21 +380,18 @@ chrome.storage.local.get(["user"], (result) => {
                   />
                 </div>
 
-                {/* Error */}
                 {profileError && (
                   <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
                     {profileError}
                   </div>
                 )}
 
-                {/* Success */}
                 {profileSuccess && (
                   <div className="rounded-lg bg-green-50 px-3 py-2 text-xs text-green-600">
                     {profileSuccess}
                   </div>
                 )}
 
-                {/* Save */}
                 <div className="flex justify-end">
                   <button
                     type="submit"
@@ -478,7 +406,6 @@ chrome.storage.local.get(["user"], (result) => {
               </form>
             </div>
 
-            {/* Password */}
             <div className="border-t border-gray-100 px-6 py-5">
               <h3 className="text-sm font-semibold text-gray-900">
                 Change Password
@@ -494,7 +421,6 @@ chrome.storage.local.get(["user"], (result) => {
                 }
                 className="mt-4 space-y-4"
               >
-                {/* Current password */}
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600">
                     Current Password
@@ -513,7 +439,6 @@ chrome.storage.local.get(["user"], (result) => {
                   />
                 </div>
 
-                {/* New password */}
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600">
                     New Password
@@ -536,7 +461,6 @@ chrome.storage.local.get(["user"], (result) => {
                   </p>
                 </div>
 
-                {/* Confirm password */}
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600">
                     Confirm New Password
@@ -555,21 +479,18 @@ chrome.storage.local.get(["user"], (result) => {
                   />
                 </div>
 
-                {/* Password error */}
                 {passwordError && (
                   <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
                     {passwordError}
                   </div>
                 )}
 
-                {/* Password success */}
                 {passwordSuccess && (
                   <div className="rounded-lg bg-green-50 px-3 py-2 text-xs text-green-600">
                     {passwordSuccess}
                   </div>
                 )}
 
-                {/* Change password */}
                 <div className="flex justify-end">
                   <button
                     type="submit"
@@ -584,7 +505,6 @@ chrome.storage.local.get(["user"], (result) => {
               </form>
             </div>
 
-            {/* Footer */}
             <div className="border-t border-gray-100 px-6 py-4">
               <button
                 type="button"

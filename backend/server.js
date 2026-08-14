@@ -5,32 +5,21 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-
 import authRoutes from "./routes/authRoutes.js";
 import authMiddleware from "./middleware/authMiddleware.js";
-
 import clientRoutes from "./routes/clientRoutes.js";
 import entryRoutes from "./routes/entryRoutes.js";
 import userRoutes from "./routes/user.routes.js";
-
 import workspaceRoutes from "./routes/workspaceRoutes.js";
 import workspaceTaskRoutes from "./routes/workspaceTaskRoutes.js";
 import workspaceNoteRoutes from "./routes/workspaceNoteRoutes.js";
 import workspaceChatRoutes from "./routes/workspaceChat.js";
-
 import User from "./models/User.js";
 import Message from "./models/Message.js";
 import WorkspaceMember from "./models/WorkspaceMember.js";
 
 dotenv.config();
-
 const app = express();
-
-/*
- * =====================================================
- * BASIC APP SETUP
- * =====================================================
- */
 
 app.use(
   cors({
@@ -38,24 +27,8 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   })
 );
-
 app.use(express.json());
-
-/*
- * =====================================================
- * HTTP SERVER
- * =====================================================
- *
- * Socket.IO needs to attach to the HTTP server.
- */
-
 const server = http.createServer(app);
-
-/*
- * =====================================================
- * SOCKET.IO
- * =====================================================
- */
 
 const io = new Server(server, {
   cors: {
@@ -63,12 +36,6 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-
-/*
- * =====================================================
- * DATABASE
- * =====================================================
- */
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -78,29 +45,13 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
-
-/*
- * =====================================================
- * BASIC ROUTES
- * =====================================================
- */
-
 app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-/*
- * =====================================================
- * REST API ROUTES
- * =====================================================
- */
-
 app.use("/api/entries", entryRoutes);
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/clients", clientRoutes);
-
 app.get(
   "/api/profile",
   authMiddleware,
@@ -111,62 +62,40 @@ app.get(
     });
   }
 );
-
 app.use(
   "/api/workspaces",
   workspaceNoteRoutes
 );
-
 app.use(
   "/api/workspaces",
   workspaceTaskRoutes
 );
-
 app.use(
   "/api/workspaces",
   workspaceRoutes
 );
-
 app.use(
   "/api/user",
   userRoutes
 );
-
 app.use(
   "/api/workspaces",
   workspaceChatRoutes
 );
 
-/*
- * =====================================================
- * SOCKET AUTHENTICATION
- * =====================================================
- */
-
 io.use(async (socket, next) => {
   try {
     const token =
       socket.handshake.auth?.token;
-
     if (!token) {
       return next(
         new Error("Authentication required")
       );
     }
-
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
-
-    /*
-     * Your JWT should contain the user ID
-     * in decoded.id.
-     *
-     * If your authMiddleware uses another
-     * property, change this accordingly.
-     */
-
     const user = await User.findById(
       decoded.id
     ).select("_id name email");
@@ -176,9 +105,7 @@ io.use(async (socket, next) => {
         new Error("User not found")
       );
     }
-
     socket.user = user;
-
     next();
   } catch (error) {
     console.error(
@@ -191,13 +118,6 @@ io.use(async (socket, next) => {
     );
   }
 });
-
-/*
- * =====================================================
- * CHECK WORKSPACE MEMBERSHIP
- * =====================================================
- */
-
 async function isWorkspaceMember(
   workspaceId,
   userId
@@ -210,23 +130,10 @@ async function isWorkspaceMember(
 
   return !!member;
 }
-
-/*
- * =====================================================
- * SOCKET CONNECTION
- * =====================================================
- */
-
 io.on("connection", (socket) => {
   console.log(
     `Socket connected: ${socket.user.name}`
   );
-
-  /*
-   * ===================================================
-   * JOIN WORKSPACE
-   * ===================================================
-   */
 
   socket.on(
     "join_workspace",
@@ -254,11 +161,6 @@ io.on("connection", (socket) => {
           `workspace:${workspaceId}`;
 
         socket.join(room);
-
-        /*
-         * Remember which workspace this socket
-         * is currently inside.
-         */
         socket.workspaceId = workspaceId;
 
         console.log(
@@ -271,11 +173,6 @@ io.on("connection", (socket) => {
             workspaceId,
           }
         );
-
-        /*
-         * Tell other members that this user
-         * is online.
-         */
         socket.to(room).emit(
           "member_online",
           {
@@ -293,12 +190,6 @@ io.on("connection", (socket) => {
     }
   );
 
-  /*
-   * ===================================================
-   * LEAVE WORKSPACE
-   * ===================================================
-   */
-
   socket.on(
     "leave_workspace",
     (workspaceId) => {
@@ -315,13 +206,6 @@ io.on("connection", (socket) => {
       }
     }
   );
-
-  /*
-   * ===================================================
-   * SEND MESSAGE
-   * ===================================================
-   */
-
   socket.on(
     "send_message",
     async ({
@@ -333,11 +217,7 @@ io.on("connection", (socket) => {
           typeof content === "string"
             ? content.trim()
             : "";
-
-        /*
-         * Validate content
-         */
-        if (!trimmedContent) {
+       if (!trimmedContent) {
           return;
         }
 
@@ -353,10 +233,7 @@ io.on("connection", (socket) => {
           return;
         }
 
-        /*
-         * Check membership
-         */
-        const allowed =
+         const allowed =
           await isWorkspaceMember(
             workspaceId,
             socket.user._id
@@ -374,20 +251,14 @@ io.on("connection", (socket) => {
           return;
         }
 
-        /*
-         * Save message to MongoDB
-         */
-        const message =
+          const message =
           await Message.create({
             workspace: workspaceId,
             sender: socket.user._id,
             content: trimmedContent,
           });
 
-        /*
-         * Populate sender
-         */
-        const populatedMessage =
+          const populatedMessage =
           await Message.findById(
             message._id
           ).populate(
@@ -395,9 +266,6 @@ io.on("connection", (socket) => {
             "name email"
           );
 
-        /*
-         * Broadcast to everyone in workspace
-         */
         const room =
           `workspace:${workspaceId}`;
 
@@ -421,12 +289,6 @@ io.on("connection", (socket) => {
       }
     }
   );
-
-  /*
-   * ===================================================
-   * TYPING
-   * ===================================================
-   */
 
   socket.on(
     "typing",
@@ -465,12 +327,7 @@ io.on("connection", (socket) => {
     }
   );
 
-  /*
-   * ===================================================
-   * STOP TYPING
-   * ===================================================
-   */
-
+ 
   socket.on(
     "stop_typing",
     async ({ workspaceId }) => {
@@ -489,22 +346,13 @@ io.on("connection", (socket) => {
     }
   );
 
-  /*
-   * ===================================================
-   * DISCONNECT
-   * ===================================================
-   */
 
   socket.on("disconnect", () => {
     console.log(
       `Socket disconnected: ${socket.user.name}`
     );
 
-    /*
-     * Tell the workspace that this user
-     * has disconnected.
-     */
-    if (socket.workspaceId) {
+     if (socket.workspaceId) {
       const room =
         `workspace:${socket.workspaceId}`;
 
@@ -520,16 +368,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-/*
- * =====================================================
- * START SERVER
- * =====================================================
- *
- * IMPORTANT:
- * Do NOT use app.listen().
- * Socket.IO is attached to `server`.
- */
 
 server.listen(
   process.env.PORT,

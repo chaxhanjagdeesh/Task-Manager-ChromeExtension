@@ -12,7 +12,6 @@ export const createWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Verify that the creator belongs to the workspace.
     const creatorMembership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -24,7 +23,6 @@ export const createWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Always include the creator as a participant.
     const participantIds = [
       ...new Set([
         req.user.id,
@@ -32,7 +30,6 @@ export const createWorkspaceNote = async (req, res) => {
       ]),
     ];
 
-    // Verify every participant belongs to this workspace.
     const validMembers = await WorkspaceMember.find({
       workspace: id,
       user: { $in: participantIds },
@@ -71,7 +68,6 @@ export const getWorkspaceNotes = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verify that the user belongs to the workspace.
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -83,7 +79,6 @@ export const getWorkspaceNotes = async (req, res) => {
       });
     }
 
-    // Only return notes where the current user is a participant.
     const notes = await WorkspaceNote.find({
       workspace: id,
       participants: req.user.id,
@@ -109,7 +104,6 @@ export const getWorkspaceNote = async (req, res) => {
   try {
     const { id, noteId } = req.params;
 
-    // Verify workspace membership.
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -121,7 +115,6 @@ export const getWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Only find the note if the current user is a participant.
     const note = await WorkspaceNote.findOne({
       _id: noteId,
       workspace: id,
@@ -153,7 +146,6 @@ export const updateWorkspaceNote = async (req, res) => {
     const { id, noteId } = req.params;
     const { title, content, participants } = req.body;
 
-    // Verify workspace membership.
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -165,7 +157,6 @@ export const updateWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Only participants can access the note.
     const note = await WorkspaceNote.findOne({
       _id: noteId,
       workspace: id,
@@ -178,7 +169,6 @@ export const updateWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Only the creator can modify the note.
     if (note.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         message: "Only the note creator can modify this note",
@@ -206,7 +196,6 @@ export const updateWorkspaceNote = async (req, res) => {
         });
       }
 
-      // Always keep the creator as a participant.
       const participantIds = [
         ...new Set([
           req.user.id,
@@ -214,7 +203,6 @@ export const updateWorkspaceNote = async (req, res) => {
         ]),
       ];
 
-      // Verify every participant belongs to this workspace.
       const validMembers = await WorkspaceMember.find({
         workspace: id,
         user: { $in: participantIds },
@@ -254,7 +242,6 @@ export const deleteWorkspaceNote = async (req, res) => {
   try {
     const { id, noteId } = req.params;
 
-    // Verify workspace membership.
     const membership = await WorkspaceMember.findOne({
       workspace: id,
       user: req.user.id,
@@ -266,7 +253,6 @@ export const deleteWorkspaceNote = async (req, res) => {
       });
     }
 
-    // User must also be a participant of the note.
     const note = await WorkspaceNote.findOne({
       _id: noteId,
       workspace: id,
@@ -279,7 +265,6 @@ export const deleteWorkspaceNote = async (req, res) => {
       });
     }
 
-    // Only the creator can delete the note.
     if (note.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         message: "Only the note creator can delete this note",
